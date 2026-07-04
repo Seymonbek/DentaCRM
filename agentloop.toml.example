@@ -1,0 +1,92 @@
+[project]
+path = "."
+brief_file = "PROJECT_BRIEF.md"
+# Test command(s) — single string or use [[project.tests]] array below
+test_command = ""
+logs_dir = ".agentloop/runs"
+# Directories to exclude from parallel builder sub-repo detection
+exclude_dirs = []
+# Patterns to exclude from repo snapshot
+snapshot_exclude = ["\\.git/", "\\.agentloop/", "node_modules/", "\\.venv/", "__pycache__/"]
+
+# Per-stack parallel tests (optional, overrides test_command)
+# [[project.tests]]
+# name = "backend"
+# command = "pytest -q"
+# cwd = "api"        # relative to project.path
+# timeout_sec = 300
+#
+# [[project.tests]]
+# name = "frontend"
+# command = "npm run build"
+# cwd = "web"
+
+[loop]
+plan_cycles = 3
+review_cycles = 3
+build_iterations = 5
+no_change_limit = 2
+sleep_between_rounds_sec = 1
+max_total_builds = 50
+max_discovery_rounds = 2
+parallel_review = true
+max_parallel_builders = 3
+
+[retry]
+max_attempts = 3
+backoff_base = 2
+backoff_max = 60
+jitter = true
+
+[budget]
+max_cost_usd = 0
+warn_at_pct = 80
+cost_per_build_usd = 0.15
+cost_per_review_usd = 0.05
+cost_per_plan_usd = 0.10
+
+[agents.planner]
+command = "kiro-cli"
+agent = "ai-planner"
+timeout_sec = 3600
+trust_all_tools = true
+
+[agents.builder]
+command = "kiro-cli"
+agent = "ai-builder"
+timeout_sec = 7200
+trust_all_tools = true
+
+[agents.reviewer]
+command = "kiro-cli"
+agent = "ai-reviewer"
+timeout_sec = 3600
+trust_all_tools = true
+
+[kiro]
+enabled = true
+command = "kiro-cli"
+agent = "ai-planner"
+timeout_sec = 3600
+resume = false
+trust_tools = ""
+trust_all_tools = true
+require_mcp_startup = false
+
+[kiro_builder]
+enabled = true
+command = "kiro-cli"
+agent = "ai-builder"
+timeout_sec = 7200
+trust_tools = "read,write,grep,shell"
+trust_all_tools = true
+
+[telegram]
+enabled = false
+bot_token = "${TELEGRAM_BOT_TOKEN}"
+chat_id = "${TELEGRAM_CHAT_ID}"
+
+[git]
+auto_push = false
+branch = "main"
+commit_message = "feat: AI orchestrator improvements"

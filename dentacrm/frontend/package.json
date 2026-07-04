@@ -1,0 +1,12 @@
+{
+  "name": "dentacrm-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "DentaCRM frontend (React 18 + Vite + TS). Placeholder — real scaffold is generated in task T5.",
+  "scripts": {
+    "dev": "node ./placeholder-server.mjs",
+    "build": "echo 'frontend build is provided by Vite in task T5' && exit 0",
+    "test": "echo 'no tests yet — see task T5' && exit 0"
+  }
+}
