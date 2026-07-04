@@ -17,6 +17,37 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from apps.inventory.urls import (
+    material_urlpatterns as inventory_material_urls,
+)
+from apps.inventory.urls import (
+    usage_urlpatterns as inventory_usage_urls,
+)
+from apps.payments.urls import (
+    doctor_commission_urlpatterns as payments_doctor_commission_urls,
+)
+from apps.payments.urls import (
+    patient_balance_urlpatterns as payments_patient_balance_urls,
+)
+from apps.payments.urls import (
+    payment_urlpatterns as payments_payment_urls,
+)
+from apps.prescriptions.urls import (
+    action_urlpatterns as prescription_action_urls,
+)
+from apps.prescriptions.urls import (
+    prescription_urlpatterns,
+)
+from apps.prescriptions.urls import (
+    template_urlpatterns as prescription_template_urls,
+)
+from apps.ratings.urls import (
+    doctor_badge_urlpatterns as ratings_doctor_badge_urls,
+)
+from apps.ratings.urls import (
+    leaderboard_urlpatterns as ratings_leaderboard_urls,
+)
+
 
 def healthcheck(_request):
     """Simple liveness endpoint used by docker healthchecks."""
@@ -28,7 +59,61 @@ def healthcheck(_request):
 # ---------------------------------------------------------------------------
 # App URL includes are appended here as new apps come online. Each entry
 # is a real, importable urls module — no dangling includes.
-api_v1_patterns: list = []
+api_v1_patterns: list = [
+    path("auth/", include("apps.accounts.urls", namespace="accounts")),
+    path("departments/", include("apps.departments.urls", namespace="departments")),
+    path("doctors/", include("apps.doctors.urls", namespace="doctors")),
+    path(
+        "doctors/",
+        include((payments_doctor_commission_urls, "payments-doctor-commissions")),
+    ),
+    path(
+        "procedure-types/",
+        include("apps.doctors.procedure_urls", namespace="procedure-types"),
+    ),
+    path("patients/", include("apps.patients.urls", namespace="patients")),
+    path(
+        "patients/",
+        include((payments_patient_balance_urls, "payments-balance")),
+    ),
+    path("appointments/", include("apps.scheduling.urls", namespace="scheduling")),
+    path("treatments/", include("apps.treatments.urls", namespace="treatments")),
+    # ``/api/v1/treatments/{id}/prescription/`` — POST issues a retsept.
+    # Mounted *before* the treatments viewset router in DRF terms so the
+    # named route wins; DRF routers match by full path so order-safe here.
+    path("treatments/", include((prescription_action_urls, "prescriptions-action"))),
+    path("tooth-records/", include("apps.odontogram.urls", namespace="odontogram")),
+    path(
+        "materials/",
+        include((inventory_material_urls, "inventory-materials")),
+    ),
+    path(
+        "material-usages/",
+        include((inventory_usage_urls, "inventory-usages")),
+    ),
+    path(
+        "prescription-templates/",
+        include((prescription_template_urls, "prescription-templates")),
+    ),
+    path(
+        "prescriptions/",
+        include((prescription_urlpatterns, "prescriptions")),
+    ),
+    path(
+        "payments/",
+        include((payments_payment_urls, "payments")),
+    ),
+    path(
+        "ratings/",
+        include((ratings_leaderboard_urls, "ratings")),
+    ),
+    path(
+        "doctors/",
+        include((ratings_doctor_badge_urls, "ratings-doctor-badges")),
+    ),
+    path("notifications/", include("apps.notifications.urls", namespace="notifications")),
+    path("reports/", include("apps.reports.urls", namespace="reports")),
+]
 
 
 urlpatterns = [

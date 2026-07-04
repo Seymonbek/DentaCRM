@@ -78,6 +78,10 @@ ASGI_APPLICATION = "config.asgi.application"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Custom user model — MUST be set before running any migration so that
+# every downstream FK resolves to accounts.User rather than auth.User.
+AUTH_USER_MODEL = "accounts.User"
+
 
 # ---------------------------------------------------------------------------
 # Installed apps
@@ -107,7 +111,23 @@ THIRD_PARTY_APPS: list[str] = [
 # Local apps are added as they come online in subsequent build tasks.
 # Each entry MUST correspond to a real ``apps/<name>/apps.py`` config to
 # keep ``manage.py check`` green.
-LOCAL_APPS: list[str] = []
+LOCAL_APPS: list[str] = [
+    "apps.core",
+    "apps.accounts",
+    "apps.departments",
+    "apps.doctors",
+    "apps.patients",
+    "apps.scheduling",
+    "apps.treatments",
+    "apps.odontogram",
+    "apps.prescriptions",
+    "apps.inventory",
+    "apps.payments",
+    "apps.ratings",
+    "apps.notifications",
+    "apps.reports",
+    "apps.telegram_bot",
+]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -245,7 +265,7 @@ REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardResultsSetPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
@@ -253,8 +273,8 @@ REST_FRAMEWORK: dict[str, Any] = {
         "rest_framework.filters.OrderingFilter",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    # Standard error envelope (implemented in apps/core in T3).
-    "EXCEPTION_HANDLER": "rest_framework.views.exception_handler",
+    # Standard error envelope (see apps/core/exceptions.py).
+    "EXCEPTION_HANDLER": "apps.core.exceptions.custom_exception_handler",
     "DEFAULT_RENDERER_CLASSES": (
         "rest_framework.renderers.JSONRenderer",
     ),
@@ -271,6 +291,7 @@ REST_FRAMEWORK: dict[str, Any] = {
 # In T3 the pagination class is replaced with:
 #   REST_FRAMEWORK["DEFAULT_PAGINATION_CLASS"] =
 #       "apps.core.pagination.StandardResultsSetPagination"
+# (T3 done — see apps.core.pagination and apps.core.exceptions.)
 
 
 # ---------------------------------------------------------------------------
@@ -321,6 +342,7 @@ SPECTACULAR_SETTINGS: dict[str, Any] = {
         {"name": "payments", "description": "Payments & commissions"},
         {"name": "ratings", "description": "Doctor ratings & badges"},
         {"name": "reports", "description": "Aggregated reports"},
+        {"name": "notifications", "description": "Outbound notifications inbox"},
     ],
 }
 
@@ -362,6 +384,55 @@ CELERY_ENABLE_UTC = True
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 5 * 60
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+# When True, tasks run in-process (used in tests to avoid a broker).
+CELERY_TASK_ALWAYS_EAGER = env_bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+CELERY_TASK_EAGER_PROPAGATES = env_bool("CELERY_TASK_EAGER_PROPAGATES", default=False)
+
+
+# ---------------------------------------------------------------------------
+# Celery Beat schedule — periodic tasks (PROJECT_BRIEF § "Celery Tasks").
+# Uses ``crontab`` so entries survive worker restarts.
+# ---------------------------------------------------------------------------
+from celery.schedules import crontab  # noqa: E402  (import after CELERY_* set)
+
+CELERY_BEAT_SCHEDULE: dict[str, Any] = {
+    "send-appointment-reminder-1day": {
+        "task": "apps.scheduling.tasks.send_appointment_reminder_1day",
+        # Run hourly at :05 — the task itself dedupes via reminder_1d_sent.
+        "schedule": crontab(minute="5"),
+    },
+    "send-appointment-reminder-2hour": {
+        "task": "apps.scheduling.tasks.send_appointment_reminder_2hour",
+        # Every 15 minutes — small window so 2h reminders are timely.
+        "schedule": crontab(minute="*/15"),
+    },
+    "send-followup-invite": {
+        "task": "apps.scheduling.tasks.send_followup_invite",
+        # Once a day at 09:00 Asia/Tashkent.
+        "schedule": crontab(minute="0", hour="9"),
+    },
+    "generate-dashboard-cache": {
+        "task": "apps.reports.tasks.generate_dashboard_cache",
+        "schedule": crontab(minute="*/5"),
+    },
+    "backup-database": {
+        "task": "apps.core.tasks.backup_database",
+        # Daily at 03:30 Asia/Tashkent (low traffic).
+        "schedule": crontab(minute="30", hour="3"),
+    },
+    "check-low-stock-sweep": {
+        "task": "apps.inventory.tasks.sweep_low_stock",
+        # Every 30 minutes — belt-and-braces alongside the post_save signal.
+        "schedule": crontab(minute="*/30"),
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# Database backup (used by apps.core.tasks.backup_database).
+# ---------------------------------------------------------------------------
+DB_BACKUPS_ENABLED = env_bool("DB_BACKUPS_ENABLED", default=False)
+DB_BACKUPS_DIR = env_str("DB_BACKUPS_DIR", "")  # default resolved at runtime
 
 
 # ---------------------------------------------------------------------------

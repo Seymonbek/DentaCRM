@@ -6,5 +6,18 @@ node_modules/
 dist/
 build/
 *.db
+*.sqlite3
 venv/
+.venv/
 .gradle/
+
+# Django runtime artefacts (also covered by dentacrm/.gitignore)
+media/
+staticfiles/
+dentacrm/backend/db.sqlite3
+dentacrm/backend/media/
+dentacrm/backend/staticfiles/
+
+# Frontend build output
+dentacrm/frontend/dist/
+dentacrm/frontend/coverage/

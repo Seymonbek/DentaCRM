@@ -1,24 +1,27 @@
 [project]
 path = "."
 brief_file = "PROJECT_BRIEF.md"
-test_command = ""
+# Combined command executed by the orchestrator when [[project.tests]]
+# entries are not iterated. Runs backend pytest first, then frontend
+# vitest — both must pass for a green verdict.
+test_command = "cd dentacrm/backend && python -m pytest --tb=short -q && cd ../frontend && npm run test -- --run"
 logs_dir = ".agentloop/runs"
 exclude_dirs = ["node_modules", "__pycache__", ".venv", "dist", "build"]
 snapshot_exclude = ["\\.git/", "\\.agentloop/", "node_modules/", "\\.venv/", "__pycache__/", "dist/", "build/"]
 
 # Backend tests
-# [[project.tests]]
-# name = "backend"
-# command = "cd backend && python -m pytest --tb=short -q"
-# cwd = "."
-# timeout_sec = 300
+[[project.tests]]
+name = "backend"
+command = "python -m pytest --tb=short -q"
+cwd = "dentacrm/backend"
+timeout_sec = 600
 
 # Frontend tests
-# [[project.tests]]
-# name = "frontend"
-# command = "cd frontend && npm run test -- --run"
-# cwd = "."
-# timeout_sec = 120
+[[project.tests]]
+name = "frontend"
+command = "npm run test -- --run"
+cwd = "dentacrm/frontend"
+timeout_sec = 300
 
 [loop]
 plan_cycles = 5

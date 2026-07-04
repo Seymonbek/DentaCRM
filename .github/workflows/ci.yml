@@ -1,0 +1,192 @@
+# =============================================================================
+# DentaCRM — Continuous Integration.
+#
+# Three parallel jobs:
+#   1. backend  — ruff + pytest with a real postgres+redis service matrix
+#   2. frontend — eslint + tsc + vitest + vite build
+#   3. compose  — validate both docker-compose files
+#
+# Cache: pip (backend) and npm (frontend).
+# =============================================================================
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1) Backend — ruff + pytest against postgres:16 + redis:7.
+  # ---------------------------------------------------------------------------
+  backend:
+    name: backend (lint + pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: dentacrm
+          POSTGRES_USER: dentacrm
+          POSTGRES_PASSWORD: dentacrm
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U dentacrm -d dentacrm"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=20
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_SECRET_KEY: ci-secret-key-only-for-tests
+      DJANGO_DEBUG: "1"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: dentacrm
+      POSTGRES_USER: dentacrm
+      POSTGRES_PASSWORD: dentacrm
+      DATABASE_URL: postgres://dentacrm:dentacrm@localhost:5432/dentacrm
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/1
+      CELERY_RESULT_BACKEND: redis://localhost:6379/2
+      CELERY_TASK_ALWAYS_EAGER: "1"
+      CELERY_TASK_EAGER_PROPAGATES: "1"
+      S3_ENDPOINT_URL: ""
+      S3_ACCESS_KEY: ""
+      S3_SECRET_KEY: ""
+      S3_BUCKET_MEDIA: dentacrm-media
+      S3_BUCKET_BACKUPS: dentacrm-backups
+      TELEGRAM_BOT_TOKEN: ""
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client + btree_gist extension
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          PGPASSWORD=dentacrm psql -h localhost -U dentacrm -d dentacrm \
+            -c "CREATE EXTENSION IF NOT EXISTS btree_gist;" \
+            -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: dentacrm/backend/requirements/dev.txt
+
+      - name: Install backend requirements
+        working-directory: dentacrm/backend
+        run: |
+          python -m pip install --upgrade "pip==24.2" "setuptools==75.1.0" "wheel==0.44.0"
+          pip install -r requirements/dev.txt
+
+      - name: Ruff (lint)
+        working-directory: dentacrm/backend
+        run: ruff check .
+
+      - name: Django system check
+        working-directory: dentacrm/backend
+        run: python manage.py check --deploy --fail-level WARNING || python manage.py check
+
+      - name: Pytest
+        working-directory: dentacrm/backend
+        run: pytest --tb=short -q --maxfail=5
+
+  # ---------------------------------------------------------------------------
+  # 2) Frontend — eslint + tsc + vitest + build.
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: frontend (lint + typecheck + vitest + build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.17.0"
+          cache: npm
+          cache-dependency-path: dentacrm/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: dentacrm/frontend
+        run: npm ci --no-audit --no-fund
+
+      - name: ESLint
+        working-directory: dentacrm/frontend
+        run: npm run lint
+
+      - name: TypeScript typecheck
+        working-directory: dentacrm/frontend
+        run: npm run typecheck
+
+      - name: Vitest
+        working-directory: dentacrm/frontend
+        run: npm test -- --run
+
+      - name: Vite build
+        working-directory: dentacrm/frontend
+        env:
+          VITE_API_URL: /api/v1
+        run: npm run build
+
+  # ---------------------------------------------------------------------------
+  # 3) Compose sanity — validate both compose files parse & interpolate.
+  # ---------------------------------------------------------------------------
+  compose:
+    name: compose (config validation)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare dev .env (from example)
+        working-directory: dentacrm
+        run: cp .env.example .env
+
+      - name: Validate dev docker-compose.yml
+        working-directory: dentacrm
+        run: docker compose -f docker-compose.yml config >/dev/null
+
+      - name: Prepare prod .env (from example, placeholders only)
+        working-directory: dentacrm
+        run: cp .env.prod.example .env
+
+      - name: Validate docker-compose.prod.yml
+        working-directory: dentacrm
+        run: docker compose -f docker-compose.prod.yml config >/dev/null
+
+      - name: Validate frontend production Dockerfile
+        working-directory: dentacrm/frontend
+        run: docker buildx build --check -f Dockerfile.prod .

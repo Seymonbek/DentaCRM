@@ -216,7 +216,7 @@ services:
     command: >
       bash -lc "
         if [ -f manage.py ] && [ -d apps/telegram_bot ]; then
-          python -m apps.telegram_bot.dispatcher_runner;
+          python manage.py run_telegram_bot;
         else
           echo 'telegram_bot app not found — T1 skeleton only. Waiting.';
           tail -f /dev/null;
