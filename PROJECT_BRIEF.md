@@ -370,10 +370,86 @@ apps/telegram_bot/
 29. ✅ Axios interceptor — access token avtomatik refresh
 30. ✅ Loading (Skeleton), Error (toast), Empty state barcha sahifalarda
 
+### UI/UX Design
+31. ✅ 3 ta theme ishlaydi: Light, Dark, System (auto-detect)
+32. ✅ Theme tanlash Settings sahifasida, localStorage'da saqlanadi
+33. ✅ Sidebar — collapse qilinadigan, ikonkali, active state highlight
+34. ✅ Barcha sahifalarda Skeleton loading, Toast notification, EmptyState
+35. ✅ Forms — validation error ko'rinishi (qizil border + xabar), focus ring
+36. ✅ Modals — backdrop blur, mobile'da bottom-sheet
+37. ✅ Responsive — mobile, tablet, desktop breakpoints
+38. ✅ Sahifalar orasida mantiqiy oqim (bemor → davolanish → to'lov)
+39. ✅ Odontogram rangli belgilar (yashil/sariq/ko'k/qizil)
+40. ✅ Professional CRM ko'rinishi — Inter font, design tokens, consistent spacing
+
 ### Integration
-31. ✅ Telegram bot — xodim bildirishnomalari + bemor eslatmalari ishlaydi
-32. ✅ End-to-end: login → navbat → davolanish → to'lov oqimi ishlaydi
-33. ✅ docker-compose up bilan butun tizim bir komandada ishga tushadi
+41. ✅ Telegram bot — xodim bildirishnomalari + bemor eslatmalari ishlaydi
+42. ✅ End-to-end: login → navbat → davolanish → to'lov oqimi ishlaydi
+43. ✅ docker-compose up bilan butun tizim bir komandada ishga tushadi
+
+---
+
+## UI/UX Design Requirements
+
+### Theme System (3 ta mavzu)
+Tizim 3 xil theme'ni qo'llab-quvvatlashi kerak, foydalanuvchi Settings sahifasidan tanlaydi:
+1. **Light** — oq fon, ko'k primary rang (#2563EB), professional CRM ko'rinishi
+2. **Dark** — qorong'i fon (#0F172A), ko'k primary (#3B82F6), ko'zni toliqtirmaydigan
+3. **System** — operatsion tizim sozlamasiga qarab avtomatik tanlanadi (prefers-color-scheme)
+
+Theme `localStorage` da saqlanadi va `<html class="dark">` orqali Tailwind dark mode bilan ishlaydi. Sahifa yangilanganda theme saqlanib qoladi.
+
+### Design System (ranglar va tipografiya)
+
+```
+Primary:    #2563EB (light) / #3B82F6 (dark)
+Success:    #16A34A (light) / #22C55E (dark)
+Warning:    #D97706 (light) / #F59E0B (dark)
+Danger:     #DC2626 (light) / #EF4444 (dark)
+Background: #FFFFFF (light) / #0F172A (dark)
+Surface:    #F8FAFC (light) / #1E293B (dark)
+Border:     #E2E8F0 (light) / #334155 (dark)
+Text:       #1E293B (light) / #E2E8F0 (dark)
+Muted:      #64748B (light va dark)
+
+Font: Inter (Google Fonts) — heading: 600-700 weight, body: 400
+Border radius: 8px (card), 6px (input/button)
+Spacing: 4px grid system (gap-1 = 4px, gap-2 = 8px, ...)
+Shadow: sm (card), md (modal/dropdown)
+```
+
+### Zamonaviy CRM dizayn qoidalari
+
+1. **Sidebar navigation** — chap tomonda doim ko'rinadigan, ikonkali, active state bilan. Collapse qilinadigan (kichik ekranda hamburger menu)
+2. **Dashboard** — KPI kartochkalar (Kunlik bemorlar, Daromad, Navbatlar soni, Low stock) + grafiklar pastda
+3. **DataTable** — zebra-striping, hover effect, sortable columns, inline actions (edit/delete ikonka)
+4. **Forms** — floating label yoki label-above, focus ring animatsiyasi, error state qizil border + xabar
+5. **Cards** — border, shadow-sm, rounded-lg, yetarli padding (p-5 yoki p-6)
+6. **Modals** — backdrop blur, scale-in animatsiya, mobile'da bottom-sheet ko'rinishida
+7. **Toast notifications** — o'ng yuqorida, auto-dismiss (5s), slide-in animatsiya
+8. **Empty states** — illustratsiya (SVG ikonka) + tavsif matn + action button
+9. **Loading** — Skeleton shimmer effect (pulse animatsiya emas, skeleton)
+10. **Transitions** — sahifalar orasida fade, sidebar toggle smooth, modal open/close scale
+11. **Responsive** — 3 breakpoint: mobile (<768), tablet (768-1024), desktop (>1024)
+12. **Odontogram** — rangli tish belgilari: yashil (sog'lom), sariq (rejalashtirilgan), ko'k (davolangan), qizil (yo'q/olib tashlangan)
+13. **Calendar** — drag-and-drop yo'q, faqat click-to-select, current-time indicator (qizil chiziq)
+14. **Patient card** — chap tarafda asosiy info, o'ng tarafda tabs (Tarix, Odontogram, To'lovlar, Rasmlar)
+15. **Accessibility** — focus-visible ring, aria-label, keyboard navigable
+
+### Sahifalar UX oqimi (bir-biriga bog'liq)
+
+```
+Login → Role asosida redirect:
+  bosh_shifokor → /dashboard (KPI + grafik)
+  doctor → /my-appointments (bugungi navbatlar)
+  administrator → /schedule (umumiy jadval)
+
+Sidebar linklaridan boshqa sahifalarga o'tish.
+Har sahifadagi amallar boshqa sahifaga olib boradi:
+  Bemorlar ro'yxati → Bemor kartochkasi → Davolanish yozuvi
+  Jadval → Navbat qo'shish → Shifokor tanlash → Slot tanlash
+  Davolanish → To'lov qo'shish → Payment success toast
+```
 
 ---
 
