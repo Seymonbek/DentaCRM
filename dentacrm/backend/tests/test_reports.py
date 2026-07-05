@@ -320,8 +320,16 @@ class TestAggregateSelectors:
     def test_appointment_counts_by_status(
         self, patient, doctor, department, procedure_type, administrator,
     ):
-        _make_appointment(patient, doctor, department, procedure_type, administrator)
-        start, end = selectors.period_range("week")
+        appt = _make_appointment(
+            patient, doctor, department, procedure_type, administrator,
+        )
+        # ``_make_appointment`` schedules for *tomorrow* 10:00. When today is
+        # Sunday, tomorrow is the *next* ISO Monday and would fall outside the
+        # current week ``[Mon 00:00, next-Mon 00:00)``. To keep this a pure
+        # aggregate-selector test — independent of the runner's weekday — we
+        # anchor ``period_range`` on the appointment's own timestamp so the
+        # returned week is guaranteed to contain it.
+        start, end = selectors.period_range("week", at=appt.scheduled_start)
         counts = selectors.appointment_counts(start, end)
         assert counts["total"] >= 1
         assert counts["scheduled"] >= 1

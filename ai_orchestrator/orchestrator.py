@@ -643,8 +643,36 @@ def _get_agent_cfg(config: Dict[str, Any], role: str) -> Dict[str, Any]:
     return config.get("kiro", {})
 
 
-def run_tests(config: Dict[str, Any], project_root: Path, log_dir: Path) -> Tuple[bool, str]:
-    """Run tests — supports both single test_command and [[project.tests]] array."""
+def run_tests(
+    config: Dict[str, Any],
+    project_root: Path,
+    log_dir: Path,
+    cfg_path: Optional[Path] = None,
+) -> Tuple[bool, str]:
+    """Run tests — supports both single ``test_command`` and ``[[project.tests]]`` array.
+
+    If ``cfg_path`` is given, the ``project.tests`` and ``project.test_command``
+    sections are re-read from disk on every call so mid-run config edits are
+    picked up. The outer ``config`` dict is otherwise loaded only once at
+    process start in ``main()`` (see the ``load_config`` call there), which
+    means without this reload the runner would keep replaying the startup
+    snapshot even after a builder patches ``agentloop.toml``.
+    """
+    # Reload project.tests + project.test_command from disk each cycle so
+    # builder edits to agentloop.toml take effect without a process restart.
+    # The orchestrator's outer config is otherwise cached at startup (see main()).
+    if cfg_path is not None and cfg_path.exists() and tomllib is not None:
+        try:
+            with cfg_path.open("rb") as f:
+                fresh = tomllib.load(f)
+            fresh_project = fresh.get("project", {})
+            if "tests" in fresh_project:
+                config["project"]["tests"] = fresh_project["tests"]
+            if "test_command" in fresh_project:
+                config["project"]["test_command"] = fresh_project["test_command"]
+        except Exception as exc:  # noqa: BLE001 — never let a reload error block tests
+            print(f"[agentloop] Warning: could not reload {cfg_path}: {exc}")
+
     tests_array = config["project"].get("tests", [])
 
     if tests_array:
@@ -1187,14 +1215,14 @@ def main(argv: Optional[List[str]] = None) -> int:  # noqa: C901
             parallel_review = config["loop"].get("parallel_review", False)
             if parallel_review and not args.dry_run:
                 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
-                    test_future = ex.submit(run_tests, config, project_root, review_dir)
+                    test_future = ex.submit(run_tests, config, project_root, review_dir, cfg_path)
                     snap_future = ex.submit(collect_repo_snapshot, project_root, "")
                     tests_ok, test_output = test_future.result()
                     snapshot_after = snap_future.result()
                 # Re-collect with test output for full snapshot
                 snapshot_after = collect_repo_snapshot(project_root, test_output)
             else:
-                tests_ok, test_output = run_tests(config, project_root, review_dir)
+                tests_ok, test_output = run_tests(config, project_root, review_dir, cfg_path=cfg_path)
                 snapshot_after = collect_repo_snapshot(project_root, test_output)
             last_test_output = test_output
 

@@ -4,17 +4,46 @@ brief_file = "PROJECT_BRIEF.md"
 # Combined command executed by the orchestrator when [[project.tests]]
 # entries are not iterated. Runs backend pytest first, then frontend
 # vitest — both must pass for a green verdict.
-test_command = "cd dentacrm/backend && python -m pytest --tb=short -q && cd ../frontend && npm run test -- --run"
+#
+# Backend uses the project-local virtualenv at
+# ``dentacrm/backend/.venv/bin/python`` explicitly (no python3 fallback).
+# A silent fallback to a bare ``python`` masked a real "python: command
+# not found" runner failure once — see task 114. The venv is a required
+# precondition; if it is missing on a fresh checkout, reconstruct it via
+# ``make backend-venv && make backend-install`` from the repo root.
+test_command = "cd dentacrm/backend && ./.venv/bin/python -m pytest --tb=short -q && cd ../frontend && npm run test -- --run"
 logs_dir = ".agentloop/runs"
 exclude_dirs = ["node_modules", "__pycache__", ".venv", "dist", "build"]
 snapshot_exclude = ["\\.git/", "\\.agentloop/", "node_modules/", "\\.venv/", "__pycache__/", "dist/", "build/"]
 
 # Backend tests
+#
+# Explicit venv Python — no fallback. The venv (dentacrm/backend/.venv)
+# is a required precondition; reconstruct with ``make backend-venv &&
+# make backend-install`` if missing. See task 114 for the rationale.
+#
+# The command is intentionally prefixed with ``cd dentacrm/backend &&``
+# and ``cwd`` is pinned to the repo root (``.``) — this mirrors the
+# combined ``test_command`` on line 14 which is already proven green
+# under the orchestrator's ``bash -lc`` invocation. Passing ``cwd`` to
+# ``subprocess.run`` alone is insufficient in this environment because
+# ``bash -l`` sources login profiles that can reset CWD/PATH before
+# the relative ``./.venv/bin/python`` resolves, producing spurious
+# ``python: command not found`` failures. The inline ``cd`` guarantees
+# the interpreter path resolves regardless of login-shell side effects
+# (task 114/115 root cause — the reviewer-directed fix).
+#
+# timeout_sec is set to 1800s (30 min) because the full suite (438
+# tests, incl. DB migrations, factory_boy fixtures, and telegram-bot
+# integration paths) consistently completes in ~13 min (786–800 s
+# across the last five verification runs). The previous 600s cap
+# would silently time out even on a clean pass — the exact class of
+# masked runner failure task 114 targets.
 [[project.tests]]
 name = "backend"
-command = "python -m pytest --tb=short -q"
-cwd = "dentacrm/backend"
-timeout_sec = 600
+command = "cd dentacrm/backend && ./.venv/bin/python -m pytest --tb=short -q"
+cwd = "."
+timeout_sec = 1800
 
 # Frontend tests
 [[project.tests]]

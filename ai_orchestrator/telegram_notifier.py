@@ -97,8 +97,12 @@ class TelegramNotifier:
         else:
             self.send(f"📦 *GitHub push* ❌ Failed")
 
-    def notify_discovery(self, tasks: List[str], round_num: int, max_rounds: int) -> None:
-        tasks_str = "\n".join(f"  {i+1}. {_esc(t)}" for i, t in enumerate(tasks[:7]))
+    def notify_discovery(self, tasks: List[Any], round_num: int, max_rounds: int) -> None:
+        def _task_text(t: Any) -> str:
+            if isinstance(t, dict):
+                return str(t.get("task", t.get("title", str(t))))
+            return str(t)
+        tasks_str = "\n".join(f"  {i+1}. {_esc(_task_text(t))}" for i, t in enumerate(tasks[:7]))
         self.send(
             f"🔎 *Auto-discovery* ({round_num}/{max_rounds})\n\n"
             f"Topilgan vazifalar ({len(tasks)} ta):\n{tasks_str}"

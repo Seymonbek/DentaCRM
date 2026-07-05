@@ -114,6 +114,7 @@ jobs:
         working-directory: dentacrm/backend
         run: python manage.py check --deploy --fail-level WARNING || python manage.py check
 
+      # CI PATH is provided by actions/setup-python@v5 above; local dev must use `./.venv/bin/python` per the Makefile / agentloop.toml policy.
       - name: Pytest
         working-directory: dentacrm/backend
         run: pytest --tb=short -q --maxfail=5
@@ -124,7 +125,7 @@ jobs:
   frontend:
     name: frontend (lint + typecheck + vitest + build)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
@@ -152,6 +153,32 @@ jobs:
       - name: Vitest
         working-directory: dentacrm/frontend
         run: npm test -- --run
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('dentacrm/frontend/package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright chromium
+        working-directory: dentacrm/frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright e2e
+        working-directory: dentacrm/frontend
+        env:
+          CI: "1"
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: dentacrm/frontend/playwright-report
+          retention-days: 7
 
       - name: Vite build
         working-directory: dentacrm/frontend
