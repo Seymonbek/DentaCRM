@@ -9,7 +9,6 @@ from __future__ import annotations
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -17,6 +16,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from apps.core.health import liveness, readiness
 from apps.inventory.urls import (
     material_urlpatterns as inventory_material_urls,
 )
@@ -50,8 +50,12 @@ from apps.ratings.urls import (
 
 
 def healthcheck(_request):
-    """Simple liveness endpoint used by docker healthchecks."""
-    return JsonResponse({"status": "ok", "service": "dentacrm-backend"})
+    """Legacy alias for :func:`apps.core.health.liveness`.
+
+    Retained so existing docker-compose healthchecks and README links
+    continue to work. Semantically identical to ``/healthz/``.
+    """
+    return liveness(_request)
 
 
 # ---------------------------------------------------------------------------
@@ -121,8 +125,13 @@ urlpatterns = [
     # during development; secured behind ADMIN_URL in prod via env).
     path("admin/", admin.site.urls),
 
-    # Health check
+    # Health checks — liveness (`/healthz/`) never touches downstream
+    # services and always returns 200 for a live process; readiness
+    # (`/readyz/`) exercises the DB + cache round-trip and returns 503
+    # when any check fails so orchestration platforms can remove the
+    # pod from load-balancer rotation.
     path("healthz/", healthcheck, name="healthz"),
+    path("readyz/", readiness, name="readyz"),
 
     # OpenAPI / Swagger
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

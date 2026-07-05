@@ -987,5 +987,7 @@ def test_patient_history_now_includes_appointments(
     response = api_client.get(f"/api/v1/patients/{patient.pk}/history/")
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
-    types = {e["type"] for e in body}
+    # T123: history endpoint now returns the standard pagination
+    # envelope; iterate over ``.results``.
+    types = {e["type"] for e in body["results"]}
     assert "appointment" in types

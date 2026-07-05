@@ -175,9 +175,18 @@ def test_me_returns_camel_case_profile(api_client, head_doctor) -> None:
     response = api_client.get(me_url)
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
-    assert set(body.keys()) == {"id", "firstName", "lastName", "phoneNumber", "role"}
+    # T125: ``twoFactorEnabled`` is now part of the profile payload.
+    assert set(body.keys()) == {
+        "id",
+        "firstName",
+        "lastName",
+        "phoneNumber",
+        "role",
+        "twoFactorEnabled",
+    }
     assert body["phoneNumber"] == "+998901234567"
     assert body["role"] == "bosh_shifokor"
+    assert body["twoFactorEnabled"] is False
 
 
 # ---------------------------------------------------------------------------

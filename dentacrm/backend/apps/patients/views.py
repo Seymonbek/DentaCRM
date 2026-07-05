@@ -27,6 +27,8 @@ from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from apps.core.pagination import StandardResultsSetPagination
+
 from .models import Patient
 from .permissions import PatientPermission
 from .selectors import (
@@ -128,15 +130,32 @@ class PatientViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary="Patient treatment timeline",
         responses={200: PatientHistoryEventSerializer(many=True)},
+        parameters=[
+            OpenApiParameter(
+                name="page",
+                required=False,
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="1-indexed page number (see standard pagination envelope).",
+            ),
+            OpenApiParameter(
+                name="page_size",
+                required=False,
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Page size override (max 100).",
+            ),
+        ],
     )
     @action(detail=True, methods=["get"], url_path="history")
     def history(self, request: Request, pk: str | None = None) -> Response:
         """Aggregated treatment/appointment/payment timeline.
 
-        The concrete data sources (treatments, appointments, payments)
-        come online in later phases. Until then the timeline is empty
-        but the endpoint returns the standard shape so the frontend can
-        wire ``usePatientHistory`` today.
+        T123: response is wrapped in the standard pagination envelope
+        (``{count, next, previous, results}``) — same shape as every
+        other list endpoint so the frontend ``useInfiniteQuery`` /
+        ``usePagination`` hooks work uniformly. Callers requesting the
+        legacy flat list must upgrade to reading ``.results``.
         """
         patient: Patient = self.get_object()
         events: list[dict[str, Any]] = _collect_history_events(patient)
@@ -156,8 +175,21 @@ class PatientViewSet(viewsets.ModelViewSet):
                     "meta": {},
                 }
             ]
-        serializer = PatientHistoryEventSerializer(events, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Standard pagination — reuses the same PageNumberPagination
+        # subclass every other list endpoint uses so ``count``, ``next``,
+        # and ``previous`` all follow the documented envelope.
+        paginator = StandardResultsSetPagination()
+        page = paginator.paginate_queryset(events, request, view=self)
+        # ``page`` is always non-None for a non-empty list; DRF only
+        # returns None when pagination is disabled globally, which is
+        # not the case here. Guard anyway to keep the type-checker happy.
+        if page is None:  # pragma: no cover - defensive branch
+            serializer = PatientHistoryEventSerializer(events, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        serializer = PatientHistoryEventSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     # ------------------------------------------------------------------
     # /patients/{id}/odontogram/
@@ -202,9 +234,15 @@ def _collect_history_events(patient: Patient) -> list[dict[str, Any]]:
         except LookupError:
             Appointment = None  # noqa: N806
         if Appointment is not None:
-            for appt in Appointment.objects.filter(patient=patient).order_by(
-                "-scheduled_start"
-            )[:50]:
+            # T122: pull ``doctor`` + ``department`` in one JOIN so future
+            # changes to the event summary can reach into either without
+            # incurring per-row queries.
+            queryset = (
+                Appointment.objects.select_related("doctor", "department")
+                .filter(patient=patient)
+                .order_by("-scheduled_start")[:50]
+            )
+            for appt in queryset:
                 events.append(
                     {
                         "id": f"appointment-{appt.pk}",
@@ -223,9 +261,15 @@ def _collect_history_events(patient: Patient) -> list[dict[str, Any]]:
         except LookupError:
             Treatment = None  # noqa: N806
         if Treatment is not None:
-            for tr in Treatment.objects.filter(patient=patient).order_by(
-                "-created_at"
-            )[:50]:
+            # T122: same rationale as the appointment queryset above.
+            queryset = (
+                Treatment.objects.select_related(
+                    "doctor", "department", "procedure_type"
+                )
+                .filter(patient=patient)
+                .order_by("-created_at")[:50]
+            )
+            for tr in queryset:
                 events.append(
                     {
                         "id": f"treatment-{tr.pk}",
@@ -244,9 +288,13 @@ def _collect_history_events(patient: Patient) -> list[dict[str, Any]]:
         except LookupError:
             Payment = None  # noqa: N806
         if Payment is not None:
-            for pay in Payment.objects.filter(patient=patient).order_by(
-                "-created_at"
-            )[:50]:
+            # T122: eager-load ``received_by`` for future summary use.
+            queryset = (
+                Payment.objects.select_related("received_by", "treatment")
+                .filter(patient=patient)
+                .order_by("-created_at")[:50]
+            )
+            for pay in queryset:
                 events.append(
                     {
                         "id": f"payment-{pay.pk}",

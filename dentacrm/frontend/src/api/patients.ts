@@ -118,10 +118,18 @@ export function deletePatient(id: string): Promise<void> {
 export function getPatientHistory(
   patientId: string,
 ): Promise<PatientHistoryEvent[]> {
-  return request<PatientHistoryEvent[]>({
+  // T123: the endpoint now returns the standard pagination envelope
+  // (`{count, next, previous, results}`). Callers of `getPatientHistory`
+  // still expect a flat array, so we transparently unwrap `.results`
+  // here — keeps `PatientDetailPage` and any other consumer unchanged.
+  // We request `page_size=100` to fetch the whole timeline in one call
+  // (matches the previous flat-list contract). If we later need true
+  // infinite scroll, callers should switch to `Paginated<...>` directly.
+  return request<Paginated<PatientHistoryEvent>>({
     method: "GET",
     url: `/patients/${patientId}/history/`,
-  });
+    params: { page_size: 100 },
+  }).then((res) => res.results);
 }
 
 export function getPatientOdontogram(

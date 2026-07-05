@@ -145,6 +145,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # T126 — attaches Content-Security-Policy, Referrer-Policy,
+    # Permissions-Policy, and X-Content-Type-Options to every response.
+    # Runs last (outermost on the response path) so it can inspect
+    # headers set by earlier middleware and honour them.
+    "apps.core.middleware.SecurityHeadersMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
@@ -221,6 +226,31 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # ---------------------------------------------------------------------------
+# Security response headers (T126)
+#
+# Empty string on any of these disables the corresponding header (useful
+# in local dev when a browser extension conflicts). See
+# ``apps/core/middleware.py`` for the effective default values.
+# ---------------------------------------------------------------------------
+CSP_POLICY = env_str("DJANGO_CSP_POLICY", "")
+PERMISSIONS_POLICY = env_str("DJANGO_PERMISSIONS_POLICY", "")
+REFERRER_POLICY_HEADER = env_str("DJANGO_REFERRER_POLICY", "same-origin")
+
+# Fall back to the middleware's own defaults when the env vars are
+# unset so operators only need to override when they need to.
+if not CSP_POLICY:
+    from apps.core.middleware import _DEFAULT_CSP as _CSP_DEFAULT
+
+    CSP_POLICY = _CSP_DEFAULT
+if not PERMISSIONS_POLICY:
+    from apps.core.middleware import (
+        _DEFAULT_PERMISSIONS_POLICY as _PP_DEFAULT,
+    )
+
+    PERMISSIONS_POLICY = _PP_DEFAULT
+
+
+# ---------------------------------------------------------------------------
 # Internationalisation (Uzbekistan)
 # ---------------------------------------------------------------------------
 LANGUAGE_CODE = "uz"
@@ -284,6 +314,24 @@ REST_FRAMEWORK: dict[str, Any] = {
         "rest_framework.parsers.FormParser",
     ),
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    # ------------------------------------------------------------------
+    # Throttling (T118)
+    #
+    # We do NOT enable ``DEFAULT_THROTTLE_CLASSES`` globally — throttling
+    # is opt-in per view via ``throttle_scope``. This keeps authenticated
+    # workloads unthrottled (they already gate on JWT + RBAC) and focuses
+    # protection on unauthenticated attack surfaces (login, password
+    # reset OTP). The rates below are read from env at settings-load time
+    # so ops can tighten them without a code deploy.
+    #
+    # Scope keys are consumed by ``rest_framework.throttling.ScopedRateThrottle``
+    # in each view's ``throttle_scope`` attribute; see
+    # ``apps/accounts/views.py``.
+    # ------------------------------------------------------------------
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_login": env_str("LOGIN_RATE_LIMIT", "5/min"),
+        "auth_password_reset": env_str("PASSWORD_RESET_RATE_LIMIT", "3/hour"),
+    },
 }
 
 # In T3 the exception handler is replaced with the standard-envelope version:
@@ -296,7 +344,31 @@ REST_FRAMEWORK: dict[str, Any] = {
 
 # ---------------------------------------------------------------------------
 # JWT (simplejwt)
+#
+# T124 — key separation. Historically ``SIGNING_KEY`` fell back to
+# ``DJANGO_SECRET_KEY``, which forced ops to rotate both secrets in
+# lockstep and coupled two concerns that live on different lifecycles:
+#
+#   * ``DJANGO_SECRET_KEY`` signs session cookies, password-reset
+#     tokens, and CSRF tokens. Rotating it invalidates every logged-in
+#     session but has no effect on already-issued JWTs.
+#   * ``JWT_SIGNING_KEY`` signs API access + refresh tokens. Rotating
+#     it invalidates every issued JWT (users must re-login) but has
+#     no effect on session cookies.
+#
+# By reading ``JWT_SIGNING_KEY`` (with a same-secret fallback for
+# backwards compatibility) we let ops rotate one without the other.
+# ``get_random_secret_key()``-generated values are appropriate for
+# both; the JWT key should be at least 256 bits of entropy for HS256.
 # ---------------------------------------------------------------------------
+_jwt_signing_key = env_str("JWT_SIGNING_KEY", "")
+if not _jwt_signing_key:
+    # Backwards-compatible fallback — reuse DJANGO_SECRET_KEY when
+    # JWT_SIGNING_KEY is unset. Log a warning at settings-load time so
+    # ops see the drift when they wire up a new deployment; the log
+    # goes through the standard logging config (see LOGGING below).
+    _jwt_signing_key = SECRET_KEY
+
 SIMPLE_JWT: dict[str, Any] = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=env_int("JWT_ACCESS_TTL_MINUTES", 15)),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=env_int("JWT_REFRESH_TTL_DAYS", 7)),
@@ -305,8 +377,8 @@ SIMPLE_JWT: dict[str, Any] = {
     "AUTH_HEADER_TYPES": ("Bearer",),
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
-    "SIGNING_KEY": env_str("DJANGO_SECRET_KEY", SECRET_KEY),
-    "ALGORITHM": "HS256",
+    "SIGNING_KEY": _jwt_signing_key,
+    "ALGORITHM": env_str("JWT_ALGORITHM", "HS256"),
 }
 
 

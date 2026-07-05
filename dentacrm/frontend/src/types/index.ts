@@ -15,6 +15,15 @@ export interface User {
   lastName: string;
   phoneNumber: string;
   role: UserRole;
+  /**
+   * T125 — two-factor authentication toggle.
+   *
+   * When ``true``, ``POST /auth/login/`` returns HTTP 202 with
+   * ``{twoFactorRequired: true}`` and the frontend must send the
+   * user's OTP code to ``/auth/2fa/verify/`` to receive a token pair.
+   * Optional so pre-T125 mock objects in tests keep compiling.
+   */
+  twoFactorEnabled?: boolean;
 }
 
 export interface Patient {

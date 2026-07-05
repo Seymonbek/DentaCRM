@@ -16,13 +16,22 @@ from .models import Patient
 
 
 def active_patients() -> QuerySet[Patient]:
-    """All non-deleted patients."""
-    return Patient.objects.filter(is_active=True)
+    """All non-deleted patients.
+
+    T122: ``created_by`` is dereferenced by the list serializer's
+    ``_camel_user`` helper for every row, so ``select_related`` collapses
+    the classic N+1 into a single JOIN.
+    """
+    return Patient.objects.select_related("created_by").filter(is_active=True)
 
 
 def all_patients() -> QuerySet[Patient]:
-    """Every patient — soft-deleted included (bosh_shifokor only)."""
-    return Patient.objects.all()
+    """Every patient — soft-deleted included (bosh_shifokor only).
+
+    Same ``select_related("created_by")`` as :func:`active_patients` —
+    both list variants pass through the same DRF serializer.
+    """
+    return Patient.objects.select_related("created_by").all()
 
 
 def patient_by_id(patient_id: Any) -> Patient | None:

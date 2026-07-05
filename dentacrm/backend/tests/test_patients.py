@@ -461,9 +461,12 @@ def test_history_endpoint_returns_seed_note_when_empty(
     response = api_client.get(f"{LIST_URL}{patient.pk}/history/")
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
-    assert isinstance(body, list)
-    assert len(body) >= 1
-    seed = body[0]
+    # T123: history now returns the standard pagination envelope.
+    assert set(body.keys()) == {"count", "next", "previous", "results"}
+    results = body["results"]
+    assert isinstance(results, list)
+    assert body["count"] == len(results) == 1
+    seed = results[0]
     assert seed["type"] == "note"
     assert "occurredAt" in seed
     assert "title" in seed
@@ -496,3 +499,104 @@ def test_unknown_patient_returns_standard_404(api_client, administrator):
     response = api_client.get(f"{LIST_URL}00000000-0000-0000-0000-000000000000/")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json()["error"]["code"] == "NOT_FOUND"
+
+
+# ===========================================================================
+# T122 — N+1 query regression guard
+# ===========================================================================
+def test_list_endpoint_is_not_n_plus_one(
+    api_client, administrator, django_assert_num_queries
+):
+    """List query count must not scale with the number of patient rows.
+
+    Before T122, ``PatientSerializer.to_representation`` triggered a
+    SELECT on ``created_by`` for every row. Adding
+    ``select_related('created_by')`` in the selector collapses that
+    into a single JOIN, so the query count for 3 rows and 15 rows
+    must be identical (± the constant baseline of session / count /
+    page / rows).
+    """
+    for i in range(15):
+        create_patient(
+            first_name=f"Bemor{i:02d}",
+            last_name="Testov",
+            phone_number=f"+9989020{i:05d}",
+            created_by=administrator,
+        )
+    _auth(api_client, administrator)
+
+    # Warm up any lazy setup (auth backend loading etc.) so the actual
+    # comparison is stable.
+    api_client.get(LIST_URL)
+
+    # Measure the query count once with the full 15 rows.
+    from django.db import connection
+    from django.test.utils import CaptureQueriesContext
+
+    with CaptureQueriesContext(connection) as ctx_15:
+        response = api_client.get(f"{LIST_URL}?page_size=100")
+        assert response.status_code == 200
+        assert response.json()["count"] == 15
+    q_15 = len(ctx_15.captured_queries)
+
+    # Delete 12 rows (leave 3) and re-measure.
+    ids_to_delete = list(Patient.objects.values_list("pk", flat=True)[:12])
+    Patient.objects.filter(pk__in=ids_to_delete).delete()
+
+    with CaptureQueriesContext(connection) as ctx_3:
+        response = api_client.get(f"{LIST_URL}?page_size=100")
+        assert response.status_code == 200
+        assert response.json()["count"] == 3
+    q_3 = len(ctx_3.captured_queries)
+
+    assert q_15 == q_3, (
+        f"list endpoint N+1 detected: 15 rows → {q_15} queries, "
+        f"3 rows → {q_3} queries. Both should be equal thanks to "
+        f"select_related('created_by')."
+    )
+
+
+# ===========================================================================
+# T123 — patient-history pagination envelope
+# ===========================================================================
+def test_history_endpoint_returns_pagination_envelope(
+    api_client, administrator
+):
+    """History must return the standard ``{count, next, previous, results}``
+    envelope so it matches every other list endpoint documented in
+    PROJECT_BRIEF § "Pagination format"."""
+    patient = create_patient(
+        first_name="Zafar",
+        last_name="Toshev",
+        phone_number="+998901234600",
+        created_by=administrator,
+    )
+    _auth(api_client, administrator)
+    response = api_client.get(f"{LIST_URL}{patient.pk}/history/")
+    assert response.status_code == status.HTTP_200_OK
+    body = response.json()
+    assert set(body.keys()) == {"count", "next", "previous", "results"}
+    assert isinstance(body["results"], list)
+    # An empty-history patient always has the "patient created" seed note.
+    assert body["count"] == 1
+    assert body["results"][0]["type"] == "note"
+
+
+def test_history_endpoint_respects_page_size(api_client, administrator):
+    """``?page_size=`` must trim the ``results`` list even when the total
+    event count exceeds the requested page size."""
+    patient = create_patient(
+        first_name="Zafar",
+        last_name="Toshev",
+        phone_number="+998901234601",
+        created_by=administrator,
+    )
+    _auth(api_client, administrator)
+    # With only the seed note there is 1 event; page_size=5 → 1 result,
+    # but ``next`` must still be None.
+    response = api_client.get(f"{LIST_URL}{patient.pk}/history/?page_size=5")
+    body = response.json()
+    assert body["count"] == 1
+    assert body["next"] is None
+    assert body["previous"] is None
+    assert len(body["results"]) == 1
