@@ -114,7 +114,7 @@ export function DoctorDetailPage(): JSX.Element {
         <div className="min-w-0">
           <Link
             to="/doctors"
-            className="mb-2 inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700"
+            className="mb-2 inline-flex items-center gap-1 text-sm text-fg-3 hover:text-fg"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             Shifokorlar
@@ -128,14 +128,14 @@ export function DoctorDetailPage(): JSX.Element {
             <>
               <h1
                 id="doctor-detail-title"
-                className="flex items-center gap-3 text-2xl font-semibold text-slate-900"
+                className="flex items-center gap-3 text-2xl font-semibold text-fg"
               >
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-brand-600/10 text-brand-600 dark:text-brand-400">
                   <Stethoscope className="h-5 w-5" aria-hidden="true" />
                 </span>
                 {doctorQ.data.user?.firstName} {doctorQ.data.user?.lastName}
               </h1>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-fg-3">
                 {doctorQ.data.specialization || "Mutaxassislik ko'rsatilmagan"}
               </p>
             </>
@@ -173,8 +173,8 @@ function ProfileCard({
   doctor: NonNullable<ReturnType<typeof useDoctor>["data"]>;
 }): JSX.Element {
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <article className="card p-5">
+      <h2 className="text-[11px] font-bold uppercase tracking-widest text-fg-3">
         Profil
       </h2>
       <dl className="mt-3 space-y-2 text-sm">
@@ -200,13 +200,7 @@ function ProfileCard({
         <Row
           label="Holati"
           value={
-            <span
-              className={
-                doctor.isActive
-                  ? "inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700"
-                  : "inline-flex rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600"
-              }
-            >
+            <span className={`badge ${doctor.isActive ? "badge-green" : "badge-muted"}`}>
               {doctor.isActive ? "Faol" : "Faol emas"}
             </span>
           }
@@ -228,8 +222,8 @@ function CommissionsSummaryCard({ doctorId }: { doctorId: string }): JSX.Element
   });
 
   return (
-    <article className="mt-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <article className="mt-4 card p-5">
+      <h2 className="text-[11px] font-bold uppercase tracking-widest text-fg-3">
         Komissiya (so'nggi 30 kun)
       </h2>
       {q.isLoading ? (
@@ -239,15 +233,15 @@ function CommissionsSummaryCard({ doctorId }: { doctorId: string }): JSX.Element
         </div>
       ) : q.data ? (
         <div className="mt-3">
-          <p className="text-3xl font-semibold text-slate-900">
+          <p className="text-3xl font-semibold text-fg">
             {Number(q.data.totalAmount).toLocaleString("uz-UZ")} so'm
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-fg-3">
             {q.data.count} ta muolaja • {from} → {to}
           </p>
         </div>
       ) : (
-        <p className="mt-3 text-sm text-slate-500">Ma'lumot yuklanmadi.</p>
+        <p className="mt-3 text-sm text-fg-3">Ma'lumot yuklanmadi.</p>
       )}
     </article>
   );
@@ -262,8 +256,8 @@ function Row({
 }): JSX.Element {
   return (
     <div className="grid grid-cols-3 gap-2">
-      <dt className="text-xs uppercase tracking-wide text-slate-500">{label}</dt>
-      <dd className="col-span-2 text-slate-800">{value}</dd>
+      <dt className="text-xs uppercase tracking-wide text-fg-3">{label}</dt>
+      <dd className="col-span-2 text-fg-2">{value}</dd>
     </div>
   );
 }
@@ -311,14 +305,14 @@ function WorkingHoursCard({ doctorId }: { doctorId: string }): JSX.Element {
   }, [workingHoursQ.data]);
 
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="card p-5">
       <header className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-fg">
             <Clock className="h-5 w-5 text-brand-600" aria-hidden="true" />
             Ish jadvali
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-fg-3">
             Har hafta takrorlanadigan ish soatlari.
           </p>
         </div>
@@ -330,31 +324,31 @@ function WorkingHoursCard({ doctorId }: { doctorId: string }): JSX.Element {
           <Skeleton className="h-10 w-full" />
         </div>
       ) : (workingHoursQ.data ?? []).length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-fg-3">
           Hozircha ish jadvali kiritilmagan. Quyidagi forma orqali qo'shing.
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-border">
           {WEEKDAY_LABELS.map((label, weekday) => {
             const rows = grouped[weekday] ?? [];
             if (rows.length === 0) return null;
             return (
               <li key={weekday} className="flex items-start gap-3 py-2">
-                <div className="w-24 text-sm font-medium text-slate-700">
+                <div className="w-24 text-sm font-medium text-fg-2">
                   {label}
                 </div>
                 <div className="flex flex-1 flex-wrap gap-2">
                   {rows.map((wh) => (
                     <span
                       key={wh.id}
-                      className="inline-flex items-center gap-2 rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-700"
+                      className="inline-flex items-center gap-2 rounded-xl bg-surface-2 border border-border px-2 py-1 text-xs text-fg-2"
                     >
                       {wh.startTime.slice(0, 5)} – {wh.endTime.slice(0, 5)}
                       <button
                         type="button"
                         onClick={() => setPendingDelete(wh)}
                         aria-label="O'chirish"
-                        className="text-slate-400 hover:text-red-600"
+                        className="text-fg-3 hover:text-danger"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                       </button>
@@ -369,14 +363,14 @@ function WorkingHoursCard({ doctorId }: { doctorId: string }): JSX.Element {
 
       <form
         onSubmit={onSubmit}
-        className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-4"
+        className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-4"
       >
         <div>
           <Label htmlFor="wh-weekday">Kun</Label>
           <select
             id="wh-weekday"
             {...form.register("weekday")}
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="select-field"
           >
             {WEEKDAY_LABELS.map((label, i) => (
               <option key={i} value={i}>
@@ -394,7 +388,7 @@ function WorkingHoursCard({ doctorId }: { doctorId: string }): JSX.Element {
             invalid={Boolean(form.formState.errors.startTime)}
           />
           {form.formState.errors.startTime ? (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="field-error">
               {form.formState.errors.startTime.message}
             </p>
           ) : null}
@@ -408,7 +402,7 @@ function WorkingHoursCard({ doctorId }: { doctorId: string }): JSX.Element {
             invalid={Boolean(form.formState.errors.endTime)}
           />
           {form.formState.errors.endTime ? (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="field-error">
               {form.formState.errors.endTime.message}
             </p>
           ) : null}
@@ -492,7 +486,7 @@ function TimeOffCard({ doctorId }: { doctorId: string }): JSX.Element {
   });
 
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="card p-5">
       <header className="mb-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
           <CalendarOff className="h-5 w-5 text-amber-600" aria-hidden="true" />
@@ -509,19 +503,19 @@ function TimeOffCard({ doctorId }: { doctorId: string }): JSX.Element {
           <Skeleton className="h-10 w-full" />
         </div>
       ) : (timeOffQ.data ?? []).length === 0 ? (
-        <p className="text-sm text-slate-500">Hozircha dam olish belgilanmagan.</p>
+        <p className="text-sm text-fg-3">Hozircha dam olish belgilanmagan.</p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-border">
           {(timeOffQ.data ?? []).map((entry) => (
             <li
               key={entry.id}
               className="flex items-start justify-between gap-3 py-2 text-sm"
             >
               <div>
-                <div className="font-medium text-slate-800">
+                <div className="font-medium text-fg-2">
                   {entry.dateStart} → {entry.dateEnd}
                 </div>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-fg-3">
                   {entry.reason || "Sabab ko'rsatilmagan"}
                 </div>
               </div>
@@ -529,7 +523,7 @@ function TimeOffCard({ doctorId }: { doctorId: string }): JSX.Element {
                 type="button"
                 onClick={() => setPendingDelete(entry.id)}
                 aria-label="O'chirish"
-                className="text-slate-400 hover:text-red-600"
+                className="text-fg-3 hover:text-danger"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -540,7 +534,7 @@ function TimeOffCard({ doctorId }: { doctorId: string }): JSX.Element {
 
       <form
         onSubmit={onSubmit}
-        className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-4"
+        className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-4"
       >
         <div>
           <Label htmlFor="to-start">Boshlanish</Label>
@@ -560,7 +554,7 @@ function TimeOffCard({ doctorId }: { doctorId: string }): JSX.Element {
             invalid={Boolean(form.formState.errors.dateEnd)}
           />
           {form.formState.errors.dateEnd ? (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="field-error">
               {form.formState.errors.dateEnd.message}
             </p>
           ) : null}
@@ -618,14 +612,14 @@ function AvailableSlotsCard({ doctorId }: { doctorId: string }): JSX.Element {
   const slotsQ = useAvailableSlots(doctorId, date);
 
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="card p-5">
       <header className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-fg">
             <CalendarClock className="h-5 w-5 text-emerald-600" aria-hidden="true" />
             Bo'sh slotlar
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-fg-3">
             30 daqiqalik intervallar bilan bo'sh vaqtlar.
           </p>
         </div>
@@ -650,7 +644,7 @@ function AvailableSlotsCard({ doctorId }: { doctorId: string }): JSX.Element {
           ))}
         </div>
       ) : (slotsQ.data?.slots ?? []).length === 0 ? (
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-fg-3">
           Ushbu kunda bo'sh slot yo'q yoki ish jadvali kiritilmagan.
         </p>
       ) : (
@@ -658,7 +652,7 @@ function AvailableSlotsCard({ doctorId }: { doctorId: string }): JSX.Element {
           {slotsQ.data!.slots.map((s, idx) => (
             <span
               key={`${s.start}-${idx}`}
-              className="inline-flex items-center rounded-md bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700"
+              className="inline-flex items-center rounded-xl bg-success/10 border border-success/20 px-2 py-1 text-xs font-medium text-success"
             >
               {s.start.slice(0, 5)} – {s.end.slice(0, 5)}
             </span>

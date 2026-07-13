@@ -69,14 +69,14 @@ export function DoctorsPage(): JSX.Element {
       sortable: true,
       cell: (row) => (
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+          <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-brand-600/10 text-brand-600 dark:text-brand-400">
             <Stethoscope className="h-4 w-4" aria-hidden="true" />
           </span>
           <div>
-            <div className="font-medium text-slate-900">
+            <div className="font-medium text-fg">
               {row.user?.firstName} {row.user?.lastName}
             </div>
-            <div className="text-xs text-slate-500">{row.user?.phoneNumber}</div>
+            <div className="text-xs text-fg-3">{row.user?.phoneNumber}</div>
           </div>
         </div>
       ),
@@ -86,8 +86,8 @@ export function DoctorsPage(): JSX.Element {
       header: "Mutaxassisligi",
       hideBelow: "md",
       cell: (row) => (
-        <span className="text-sm text-slate-700">
-          {row.specialization || <span className="text-slate-400">—</span>}
+        <span className="text-sm text-fg-2">
+          {row.specialization || <span className="text-fg-3">—</span>}
         </span>
       ),
     },
@@ -99,21 +99,14 @@ export function DoctorsPage(): JSX.Element {
         row.departments.length ? (
           <div className="flex flex-wrap gap-1">
             {row.departments.slice(0, 3).map((d) => (
-              <span
-                key={d.id}
-                className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700"
-              >
-                {d.name}
-              </span>
+              <span key={d.id} className="badge badge-muted">{d.name}</span>
             ))}
             {row.departments.length > 3 ? (
-              <span className="text-xs text-slate-500">
-                +{row.departments.length - 3}
-              </span>
+              <span className="text-xs text-fg-3">+{row.departments.length - 3}</span>
             ) : null}
           </div>
         ) : (
-          <span className="text-xs text-slate-400">—</span>
+          <span className="text-xs text-fg-3">—</span>
         ),
     },
     {
@@ -123,10 +116,8 @@ export function DoctorsPage(): JSX.Element {
       hideBelow: "lg",
       cell: (row) => (
         <div className="text-right text-xs">
-          <div className="font-medium text-slate-800">
-            {row.defaultCommissionRate ?? "0.00"}%
-          </div>
-          <div className="text-slate-500">
+          <div className="font-semibold text-fg">{row.defaultCommissionRate ?? "0.00"}%</div>
+          <div className="text-fg-3">
             {row.commissionBasis === "from_net" ? "sof daromaddan" : "umumiy summadan"}
           </div>
         </div>
@@ -138,13 +129,7 @@ export function DoctorsPage(): JSX.Element {
       align: "center",
       hideBelow: "md",
       cell: (row) => (
-        <span
-          className={
-            row.isActive
-              ? "inline-flex rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700"
-              : "inline-flex rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600"
-          }
-        >
+        <span className={`badge ${row.isActive ? "badge-green" : "badge-muted"}`}>
           {row.isActive ? "Faol" : "Faol emas"}
         </span>
       ),
@@ -191,7 +176,7 @@ export function DoctorsPage(): JSX.Element {
               setDepartment(event.target.value);
               setPage(1);
             }}
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="select-field"
           >
             <option value="">Barcha bo'limlar</option>
             {departmentsQuery.data?.results.map((d) => (
@@ -201,10 +186,8 @@ export function DoctorsPage(): JSX.Element {
             ))}
           </select>
         </div>
-        <div className="text-right text-xs text-slate-500 sm:self-center">
-          {doctorsQuery.data
-            ? `Jami: ${doctorsQuery.data.count.toLocaleString("uz-UZ")}`
-            : "—"}
+        <div className="text-right text-xs text-fg-3 sm:self-center">
+          {doctorsQuery.data ? `Jami: ${doctorsQuery.data.count.toLocaleString("uz-UZ")}` : "—"}
         </div>
       </div>
 
@@ -313,7 +296,7 @@ function CreateDoctorModal({
         <>
           <Button
             type="button"
-            variant="outline"
+            variant="secondary"
             onClick={() => {
               form.reset();
               onClose();
@@ -338,7 +321,7 @@ function CreateDoctorModal({
             autoFocus
           />
           {form.formState.errors.firstName ? (
-            <p className="mt-1 text-xs text-red-600">{form.formState.errors.firstName.message}</p>
+            <p className="field-error">{form.formState.errors.firstName.message}</p>
           ) : null}
         </div>
         <div>
@@ -349,7 +332,7 @@ function CreateDoctorModal({
             invalid={Boolean(form.formState.errors.lastName)}
           />
           {form.formState.errors.lastName ? (
-            <p className="mt-1 text-xs text-red-600">{form.formState.errors.lastName.message}</p>
+            <p className="field-error">{form.formState.errors.lastName.message}</p>
           ) : null}
         </div>
         <div>
@@ -361,7 +344,7 @@ function CreateDoctorModal({
             invalid={Boolean(form.formState.errors.phoneNumber)}
           />
           {form.formState.errors.phoneNumber ? (
-            <p className="mt-1 text-xs text-red-600">{form.formState.errors.phoneNumber.message}</p>
+            <p className="field-error">{form.formState.errors.phoneNumber.message}</p>
           ) : null}
         </div>
         <div>
@@ -374,7 +357,7 @@ function CreateDoctorModal({
             invalid={Boolean(form.formState.errors.password)}
           />
           {form.formState.errors.password ? (
-            <p className="mt-1 text-xs text-red-600">{form.formState.errors.password.message}</p>
+            <p className="field-error">{form.formState.errors.password.message}</p>
           ) : null}
         </div>
         <div className="sm:col-span-2">
@@ -386,7 +369,7 @@ function CreateDoctorModal({
           <select
             id="doctor-role"
             {...form.register("role")}
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="select-field"
           >
             <option value="doctor">Shifokor</option>
             <option value="bosh_shifokor">Bosh shifokor</option>
@@ -397,7 +380,7 @@ function CreateDoctorModal({
           <select
             id="doctor-commissionBasis"
             {...form.register("commissionBasis")}
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="select-field"
           >
             <option value="from_total">Umumiy summadan</option>
             <option value="from_net">Sof daromaddan</option>
@@ -411,7 +394,7 @@ function CreateDoctorModal({
             invalid={Boolean(form.formState.errors.defaultCommissionRate)}
           />
           {form.formState.errors.defaultCommissionRate ? (
-            <p className="mt-1 text-xs text-red-600">
+            <p className="field-error">
               {form.formState.errors.defaultCommissionRate.message}
             </p>
           ) : null}
@@ -422,19 +405,19 @@ function CreateDoctorModal({
             {departmentsQuery.data?.results.map((d) => (
               <label
                 key={d.id}
-                className="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
+                className="flex items-center gap-2 rounded-xl border border-border px-3 py-2 text-sm cursor-pointer hover:bg-surface-2 transition-colors"
               >
                 <input
                   type="checkbox"
                   value={d.id}
                   {...form.register("departmentIds")}
-                  className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  className="h-4 w-4 rounded-md border-border text-brand-600 focus:ring-brand-500/30"
                 />
                 <span>{d.name}</span>
               </label>
             ))}
             {departmentsQuery.data?.results.length === 0 ? (
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-fg-3">
                 Avval bo'lim yarating, so'ng shifokorni tayinlashingiz mumkin.
               </p>
             ) : null}

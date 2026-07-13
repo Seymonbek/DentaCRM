@@ -34,7 +34,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     The output payload is camelCase to match the frontend TS ``User``
     interface: ``{id, firstName, lastName, phoneNumber, role,
-    twoFactorEnabled}``.
+    twoFactorEnabled, telegramChatId}``.
 
     T125: ``twoFactorEnabled`` is now exposed so the frontend can render
     the 2FA toggle on the Settings page. The field is **read-only** on
@@ -53,6 +53,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "phone_number",
             "role",
             "two_factor_enabled",
+            "telegram_chat_id",
         )
         read_only_fields = fields
 
@@ -65,7 +66,26 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "phoneNumber": base["phone_number"],
             "role": base["role"],
             "twoFactorEnabled": bool(base["two_factor_enabled"]),
+            "telegramChatId": base["telegram_chat_id"],
         }
+
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """Serializer to handle profile updates for the currently-authenticated user.
+
+    Allows updating first name, last name, and Telegram chat ID.
+    """
+
+    firstName = serializers.CharField(source="first_name", required=False, max_length=100)
+    lastName = serializers.CharField(source="last_name", required=False, max_length=100)
+    telegramChatId = serializers.IntegerField(source="telegram_chat_id", required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ("firstName", "lastName", "telegramChatId")
+
+    def to_representation(self, instance: User) -> dict[str, Any]:
+        return UserProfileSerializer(instance).data
 
 
 # ---------------------------------------------------------------------------
@@ -402,6 +422,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 
 __all__ = [
     "UserProfileSerializer",
+    "UserProfileUpdateSerializer",
     "LoginSerializer",
     "TokenRefreshInputSerializer",
     "PasswordResetRequestSerializer",

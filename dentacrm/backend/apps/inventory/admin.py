@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
+from unfold.admin import ModelAdmin
 
 from .models import Material, MaterialStockLog, MaterialUsage
 
 
 @admin.register(Material)
-class MaterialAdmin(SimpleHistoryAdmin):
+class MaterialAdmin(ModelAdmin):
     list_display = (
         "name",
         "unit",
@@ -24,7 +24,7 @@ class MaterialAdmin(SimpleHistoryAdmin):
 
 
 @admin.register(MaterialUsage)
-class MaterialUsageAdmin(admin.ModelAdmin):
+class MaterialUsageAdmin(ModelAdmin):
     list_display = ("material", "treatment", "quantity_used", "recorded_by", "created_at")
     list_filter = ("material",)
     search_fields = ("material__name",)
@@ -33,7 +33,7 @@ class MaterialUsageAdmin(admin.ModelAdmin):
 
 
 @admin.register(MaterialStockLog)
-class MaterialStockLogAdmin(admin.ModelAdmin):
+class MaterialStockLogAdmin(ModelAdmin):
     list_display = (
         "material",
         "change_amount",
@@ -64,3 +64,4 @@ class MaterialStockLogAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):  # audit log is append-only
         return False
+

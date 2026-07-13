@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import CommissionRecord, Payment
 
 
 @admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
+class PaymentAdmin(ModelAdmin):
     list_display = (
         "id", "treatment", "patient", "amount", "method",
         "received_by", "is_active", "created_at",
@@ -20,7 +21,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
 
 @admin.register(CommissionRecord)
-class CommissionRecordAdmin(admin.ModelAdmin):
+class CommissionRecordAdmin(ModelAdmin):
     list_display = (
         "id", "doctor", "treatment", "amount", "rate",
         "basis", "material_cost", "calculated_at",
@@ -33,3 +34,4 @@ class CommissionRecordAdmin(admin.ModelAdmin):
         "base_amount", "material_cost",
     )
     ordering = ("-calculated_at",)
+

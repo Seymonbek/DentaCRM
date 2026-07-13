@@ -208,18 +208,18 @@ export function InventoryPage(): JSX.Element {
           <div className="flex items-start gap-3">
             <span
               className={cn(
-                "mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md",
+                "mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl",
                 row.isBelowThreshold
-                  ? "bg-amber-100 text-amber-700"
-                  : "bg-brand-50 text-brand-600",
+                  ? "bg-warning/15 text-warning"
+                  : "bg-brand-600/10 text-brand-600 dark:text-brand-400",
               )}
             >
               <Package className="h-4 w-4" aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <div className="font-medium text-slate-900">{row.name}</div>
+              <div className="font-medium text-fg">{row.name}</div>
               {row.notes ? (
-                <div className="line-clamp-1 text-xs text-slate-500">
+                <div className="line-clamp-1 text-xs text-fg-3">
                   {row.notes}
                 </div>
               ) : null}
@@ -238,12 +238,12 @@ export function InventoryPage(): JSX.Element {
             <span
               className={cn(
                 "font-medium tabular-nums",
-                row.isBelowThreshold ? "text-amber-700" : "text-slate-900",
+                row.isBelowThreshold ? "text-warning" : "text-fg",
               )}
             >
               {formatQty(row.quantityInStock, row.unit)}
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-fg-3">
               min: {formatQty(row.minimumThreshold, row.unit)}
             </span>
           </div>
@@ -256,14 +256,12 @@ export function InventoryPage(): JSX.Element {
         hideBelow: "md",
         cell: (row) =>
           row.isBelowThreshold ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <span className="inline-flex items-center gap-1 rounded-full badge badge-amber">
               <AlertTriangle className="h-3 w-3" aria-hidden="true" />
               Kam qoldi
             </span>
           ) : (
-            <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
-              Yetarli
-            </span>
+            <span className="badge badge-green">Yetarli</span>
           ),
       },
       {
@@ -272,7 +270,7 @@ export function InventoryPage(): JSX.Element {
         align: "right",
         hideBelow: "lg",
         cell: (row) => (
-          <span className="text-xs text-slate-600 tabular-nums">
+          <span className="text-xs text-fg-3 tabular-nums">
             {formatCost(row.unitCost)}
           </span>
         ),
@@ -284,7 +282,7 @@ export function InventoryPage(): JSX.Element {
         sortField: "updated_at",
         hideBelow: "lg",
         cell: (row) => (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-fg-3">
             {formatDateTime(row.updatedAt)}
           </span>
         ),
@@ -328,11 +326,11 @@ export function InventoryPage(): JSX.Element {
         <div
           role="status"
           aria-live="polite"
-          className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800"
+          className="mb-4 rounded-xl border border-warning/30 bg-warning/8 p-4 text-sm text-warning"
         >
           <div className="flex items-start gap-3">
             <AlertTriangle
-              className="mt-0.5 h-5 w-5 shrink-0 text-amber-600"
+              className="mt-0.5 h-5 w-5 shrink-0 text-warning"
               aria-hidden="true"
             />
             <div className="min-w-0 flex-1">
@@ -343,14 +341,14 @@ export function InventoryPage(): JSX.Element {
                 {lowStockRows.map((row) => (
                   <li key={row.id}>
                     <span className="font-medium">{row.name}</span>{" "}
-                    <span className="text-amber-700">
+                    <span className="text-fg-3">
                       ({formatQty(row.quantityInStock, row.unit)} / min{" "}
                       {formatQty(row.minimumThreshold, row.unit)})
                     </span>
                   </li>
                 ))}
                 {lowStockCount > lowStockRows.length ? (
-                  <li className="text-amber-700">
+                  <li className="text-fg-3">
                     …va yana {lowStockCount - lowStockRows.length} ta.
                   </li>
                 ) : null}
@@ -390,10 +388,10 @@ export function InventoryPage(): JSX.Element {
               }}
             />
           </div>
-          <label className="inline-flex select-none items-center gap-2 text-sm text-slate-700">
+          <label className="inline-flex select-none items-center gap-2 text-sm text-fg-2">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              className="h-4 w-4 rounded-md border-border text-brand-600 focus:ring-brand-500/30"
               checked={belowOnly}
               onChange={(event) => {
                 setBelowOnly(event.target.checked);
@@ -404,7 +402,7 @@ export function InventoryPage(): JSX.Element {
           </label>
         </div>
         {query.data ? (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-fg-3">
             Jami: {query.data.count.toLocaleString("uz-UZ")}
           </span>
         ) : null}
@@ -469,7 +467,7 @@ export function InventoryPage(): JSX.Element {
                     onClick={() => setPendingDelete(row)}
                     aria-label={`${row.name} — o'chirish`}
                     title="O'chirish"
-                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="text-danger hover:bg-danger-bg hover:text-danger"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
@@ -664,7 +662,7 @@ function MaterialFormModal({
             autoFocus
           />
           {form.formState.errors.name ? (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="field-error" role="alert">
               {form.formState.errors.name.message}
             </p>
           ) : null}
@@ -677,10 +675,9 @@ function MaterialFormModal({
               id="material-unit"
               {...form.register("unit")}
               className={cn(
-                "block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm",
-                "focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40",
+                "select-field",
                 form.formState.errors.unit &&
-                  "border-red-400 focus:border-red-500 focus:ring-red-500/40",
+                  "border-danger focus:border-danger focus:ring-danger/20",
               )}
             >
               <option value="piece">Dona</option>
@@ -688,7 +685,7 @@ function MaterialFormModal({
               <option value="ml">Millilitr</option>
             </select>
             {form.formState.errors.unit ? (
-              <p className="mt-1 text-xs text-red-600" role="alert">
+              <p className="field-error" role="alert">
                 {form.formState.errors.unit.message}
               </p>
             ) : null}
@@ -704,7 +701,7 @@ function MaterialFormModal({
               invalid={Boolean(form.formState.errors.unitCost)}
             />
             {form.formState.errors.unitCost ? (
-              <p className="mt-1 text-xs text-red-600" role="alert">
+              <p className="field-error" role="alert">
                 {form.formState.errors.unitCost.message}
               </p>
             ) : null}
@@ -724,13 +721,13 @@ function MaterialFormModal({
               invalid={Boolean(form.formState.errors.quantityInStock)}
             />
             {isEdit ? (
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-fg-3">
                 Tahrirlashda zaxira o'zgarmaydi — "To'ldirish" tugmasidan
                 foydalaning.
               </p>
             ) : null}
             {form.formState.errors.quantityInStock ? (
-              <p className="mt-1 text-xs text-red-600" role="alert">
+              <p className="field-error" role="alert">
                 {form.formState.errors.quantityInStock.message}
               </p>
             ) : null}
@@ -745,7 +742,7 @@ function MaterialFormModal({
               invalid={Boolean(form.formState.errors.minimumThreshold)}
             />
             {form.formState.errors.minimumThreshold ? (
-              <p className="mt-1 text-xs text-red-600" role="alert">
+              <p className="field-error" role="alert">
                 {form.formState.errors.minimumThreshold.message}
               </p>
             ) : null}
@@ -758,11 +755,11 @@ function MaterialFormModal({
             id="material-notes"
             rows={3}
             {...form.register("notes")}
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="textarea-field"
             placeholder="Ixtiyoriy — turi, katalog raqami va boshqalar."
           />
           {form.formState.errors.notes ? (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="field-error" role="alert">
               {form.formState.errors.notes.message}
             </p>
           ) : null}
@@ -863,7 +860,7 @@ function RestockModal({
             invalid={Boolean(form.formState.errors.amount)}
           />
           {form.formState.errors.amount ? (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="field-error" role="alert">
               {form.formState.errors.amount.message}
             </p>
           ) : null}
@@ -877,7 +874,7 @@ function RestockModal({
             invalid={Boolean(form.formState.errors.note)}
           />
           {form.formState.errors.note ? (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="field-error" role="alert">
               {form.formState.errors.note.message}
             </p>
           ) : null}

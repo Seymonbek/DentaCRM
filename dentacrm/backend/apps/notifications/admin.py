@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import NotificationLog
 
 
 @admin.register(NotificationLog)
-class NotificationLogAdmin(admin.ModelAdmin):
+class NotificationLogAdmin(ModelAdmin):
     """Support-oriented admin — most rows are read-only."""
 
     list_display = (
@@ -33,3 +34,4 @@ class NotificationLogAdmin(admin.ModelAdmin):
         "sent_at",
     )
     ordering = ("-created_at",)
+

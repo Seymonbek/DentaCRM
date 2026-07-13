@@ -204,10 +204,10 @@ export function AppRouter(): JSX.Element {
         />
       </Route>
 
-      {/* doctor + administrator (patient views) */}
+      {/* bosh_shifokor + doctor + administrator (patient views & payments) */}
       <Route
         element={
-          <RoleGuard allow={["doctor", "administrator"]}>
+          <RoleGuard allow={["bosh_shifokor", "doctor", "administrator"]}>
             <AppShell />
           </RoleGuard>
         }
@@ -228,12 +228,20 @@ export function AppRouter(): JSX.Element {
             </RouteSuspense>
           }
         />
+        <Route
+          path="/payments/new"
+          element={
+            <RouteSuspense>
+              <NewPaymentPage />
+            </RouteSuspense>
+          }
+        />
       </Route>
 
-      {/* administrator */}
+      {/* bosh_shifokor + administrator (scheduling & patient registration) */}
       <Route
         element={
-          <RoleGuard allow={["administrator"]}>
+          <RoleGuard allow={["bosh_shifokor", "administrator"]}>
             <AppShell />
           </RoleGuard>
         }
@@ -259,14 +267,6 @@ export function AppRouter(): JSX.Element {
           element={
             <RouteSuspense>
               <NewAppointmentPage />
-            </RouteSuspense>
-          }
-        />
-        <Route
-          path="/payments/new"
-          element={
-            <RouteSuspense>
-              <NewPaymentPage />
             </RouteSuspense>
           }
         />

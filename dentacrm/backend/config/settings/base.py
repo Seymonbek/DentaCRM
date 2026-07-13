@@ -87,6 +87,7 @@ AUTH_USER_MODEL = "accounts.User"
 # Installed apps
 # ---------------------------------------------------------------------------
 DJANGO_APPS: list[str] = [
+    "unfold",  # Must be before django.contrib.admin
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -150,6 +151,12 @@ MIDDLEWARE = [
     # Runs last (outermost on the response path) so it can inspect
     # headers set by earlier middleware and honour them.
     "apps.core.middleware.SecurityHeadersMiddleware",
+    # T131 — attach X-Request-ID to each request/response and bind
+    # request_id + user_id into contextvars so JSON logs correlate
+    # web + Celery + Sentry traces. Registered *after* the auth
+    # middleware so ``request.user`` is populated by the time the
+    # response phase re-binds the user id contextvar.
+    "apps.core.middleware.RequestIdMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
@@ -275,6 +282,34 @@ STATICFILES_DIRS: list[Path] = []
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# ---------------------------------------------------------------------------
+# Upload size caps (T130)
+#
+# DATA_UPLOAD_MAX_MEMORY_SIZE caps the total request body Django will
+# buffer in memory before writing a 413 (RequestEntityTooLarge). We set
+# it to 10 MiB to leave headroom for a single ~8 MiB photo (see
+# MAX_PHOTO_MB) plus multipart overhead. FILE_UPLOAD_MAX_MEMORY_SIZE
+# controls when Django spills uploads to a temporary file on disk vs
+# keeping them in RAM; keeping the two symmetric means a single-file
+# upload stays fully in memory (faster for the Pillow verify() pass in
+# apps.treatments.services.upload_treatment_photo).
+#
+# Per-photo validation (MIME, extension, Pillow.verify, size) is
+# enforced in the service layer — see MAX_PHOTO_MB below.
+# ---------------------------------------------------------------------------
+DATA_UPLOAD_MAX_MEMORY_SIZE = env_int(
+    "DATA_UPLOAD_MAX_MEMORY_SIZE", 10 * 1024 * 1024  # 10 MiB
+)
+FILE_UPLOAD_MAX_MEMORY_SIZE = env_int(
+    "FILE_UPLOAD_MAX_MEMORY_SIZE", 10 * 1024 * 1024  # 10 MiB
+)
+
+# Treatment photo per-file cap (T130). Read by
+# apps.treatments.services.upload_treatment_photo. 8 MiB is generous
+# for a smartphone camera JPEG (typically 2–4 MiB) and leaves room for
+# the 10 MiB request cap above without a hard clash.
+MAX_PHOTO_MB = env_int("MAX_PHOTO_MB", 8)
 
 # Storage backends (S3/MinIO overridden in prod.py; dev keeps local FS).
 STORAGES = {
@@ -529,7 +564,17 @@ TELEGRAM_WEBHOOK_URL = env_str("TELEGRAM_WEBHOOK_URL", "")
 
 # ---------------------------------------------------------------------------
 # Logging (structured; INFO in dev, WARNING in prod)
+#
+# T131 — a ``JsonFormatter`` handler is available under the ``json``
+# formatter name. It reads request_id + user_id from the contextvars
+# populated by :class:`apps.core.middleware.RequestIdMiddleware`. Flip
+# ``DJANGO_LOG_JSON=1`` in the environment to route the console
+# handler through it. Prod defaults it on; dev defaults it off so
+# tail-ing runserver logs stays human-readable.
 # ---------------------------------------------------------------------------
+_LOG_JSON = env_bool("DJANGO_LOG_JSON", default=False)
+_LOG_FORMATTER = "json" if _LOG_JSON else "verbose"
+
 LOGGING: dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -537,11 +582,14 @@ LOGGING: dict[str, Any] = {
         "verbose": {
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
         },
+        "json": {
+            "()": "apps.core.logging.JsonFormatter",
+        },
     },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": _LOG_FORMATTER,
         },
     },
     "root": {
@@ -567,3 +615,32 @@ LOGGING: dict[str, Any] = {
 # Simple-history configuration
 # ---------------------------------------------------------------------------
 SIMPLE_HISTORY_REVERT_DISABLED = True
+
+
+# ---------------------------------------------------------------------------
+# Django Unfold Configuration (T133)
+# ---------------------------------------------------------------------------
+UNFOLD = {
+    "SITE_TITLE": "DentaCRM Admin",
+    "SITE_HEADER": "DentaCRM Admin",
+    "SITE_URL": "/admin/",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": False,
+    "THEME": "dark",  # default to dark mode to match our premium theme
+    "COLORS": {
+        "primary": {
+            "50": "250 250 250",
+            "100": "244 244 245",
+            "200": "228 228 231",
+            "300": "212 212 216",
+            "400": "161 161 170",
+            "500": "113 113 122",
+            "600": "82 82 91",
+            "700": "63 63 70",
+            "800": "39 39 42",
+            "900": "24 24 27",
+            "950": "9 9 11",
+        },
+    },
+}
+

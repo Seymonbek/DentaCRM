@@ -1,43 +1,53 @@
 import { useEffect } from "react";
-import { CheckCircle2, Info, TriangleAlert, XCircle, X } from "lucide-react";
-
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useNotificationStore, type ToastKind } from "@/store/notificationStore";
 
-const ICONS: Record<ToastKind, JSX.Element> = {
-  info: <Info className="h-5 w-5 text-brand-600" aria-hidden="true" />,
-  success: <CheckCircle2 className="h-5 w-5 text-emerald-600" aria-hidden="true" />,
-  warning: <TriangleAlert className="h-5 w-5 text-amber-600" aria-hidden="true" />,
-  error: <XCircle className="h-5 w-5 text-red-600" aria-hidden="true" />,
+const ICONS: Record<ToastKind, typeof CheckCircle2> = {
+  success: CheckCircle2,
+  error:   XCircle,
+  warning: AlertTriangle,
+  info:    Info,
 };
 
-const AUTO_DISMISS_MS: Record<ToastKind, number> = {
-  info: 4000,
-  success: 3500,
-  warning: 6000,
-  error: 8000,
+const STYLES: Record<ToastKind, { wrapper: string; icon: string; bar: string }> = {
+  success: {
+    wrapper: "border-emerald-500/25 bg-emerald-950/80",
+    icon:    "text-emerald-400",
+    bar:     "bg-emerald-500",
+  },
+  error: {
+    wrapper: "border-red-500/25 bg-red-950/80",
+    icon:    "text-red-400",
+    bar:     "bg-red-500",
+  },
+  warning: {
+    wrapper: "border-amber-500/25 bg-amber-950/80",
+    icon:    "text-amber-400",
+    bar:     "bg-amber-500",
+  },
+  info: {
+    wrapper: "border-violet-500/25 bg-violet-950/80",
+    icon:    "text-violet-400",
+    bar:     "bg-violet-500",
+  },
 };
 
-/** Renders the queue of toasts. Mount once at the app root. */
 export function ToastViewport(): JSX.Element {
   const toasts = useNotificationStore((s) => s.toasts);
-  const dismiss = useNotificationStore((s) => s.dismiss);
-
   return (
     <div
-      role="region"
       aria-live="polite"
-      aria-label="Bildirishnomalar"
-      className="pointer-events-none fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4 sm:items-end sm:pr-6"
+      aria-atomic="false"
+      className="pointer-events-none fixed bottom-5 right-5 z-[100] flex flex-col gap-2.5 w-[360px]"
     >
-      {toasts.map((toast) => (
+      {toasts.map((t) => (
         <ToastItem
-          key={toast.id}
-          id={toast.id}
-          kind={toast.kind}
-          title={toast.title}
-          description={toast.description}
-          onDismiss={() => dismiss(toast.id)}
+          key={t.id}
+          id={t.id}
+          kind={t.kind}
+          title={t.title}
+          message={t.description}
         />
       ))}
     </div>
@@ -48,42 +58,56 @@ interface ToastItemProps {
   id: string;
   kind: ToastKind;
   title?: string;
-  description?: string;
-  onDismiss: () => void;
+  message?: string;
+  duration?: number;
 }
 
-function ToastItem({ id, kind, title, description, onDismiss }: ToastItemProps): JSX.Element {
+function ToastItem({ id, kind, title, message, duration = 4500 }: ToastItemProps): JSX.Element {
+  const dismiss = useNotificationStore((s) => s.dismiss);
+  const Icon = ICONS[kind];
+  const s = STYLES[kind];
+
   useEffect(() => {
-    const timeout = window.setTimeout(onDismiss, AUTO_DISMISS_MS[kind]);
-    return () => window.clearTimeout(timeout);
-  }, [kind, onDismiss]);
+    const t = setTimeout(() => dismiss(id), duration);
+    return () => clearTimeout(t);
+  }, [id, duration, dismiss]);
 
   return (
     <div
-      role="status"
-      data-toast-id={id}
+      role="alert"
       className={cn(
-        "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border bg-white p-4 shadow-lg animate-fade-in",
-        kind === "error" && "border-red-200",
-        kind === "warning" && "border-amber-200",
-        kind === "success" && "border-emerald-200",
-        kind === "info" && "border-brand-200",
+        "pointer-events-auto relative flex items-start gap-3.5 rounded-2xl border p-4",
+        "animate-toast-in overflow-hidden",
+        s.wrapper,
       )}
+      style={{
+        backdropFilter: "blur(20px) saturate(180%)",
+        WebkitBackdropFilter: "blur(20px) saturate(180%)",
+        boxShadow: "0 20px 48px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)",
+      }}
     >
-      <div className="mt-0.5 shrink-0">{ICONS[kind]}</div>
-      <div className="min-w-0 flex-1">
-        {title ? <p className="mb-0.5 text-sm font-semibold text-slate-900">{title}</p> : null}
-        {description ? (
-          <p className="break-words text-sm text-slate-700">{description}</p>
+      {/* Left color bar */}
+      <div className={cn("absolute left-0 top-3 bottom-3 w-[3px] rounded-full", s.bar)} />
+
+      <Icon className={cn("mt-0.5 h-4.5 w-4.5 shrink-0", s.icon)} aria-hidden="true" />
+
+      <div className="min-w-0 flex-1 pl-1">
+        {title ? (
+          <p className="text-[13px] font-semibold leading-tight text-white">{title}</p>
+        ) : null}
+        {message ? (
+          <p className={cn("text-[12px] leading-snug text-slate-400", title ? "mt-1" : "font-medium text-white")}>
+            {message}
+          </p>
         ) : null}
       </div>
+
       <button
-        type="button"
-        onClick={onDismiss}
+        onClick={() => dismiss(id)}
         aria-label="Yopish"
-        className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+        className="shrink-0 rounded-lg p-1 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-all duration-150 active:scale-90"
       >
-        <X className="h-4 w-4" aria-hidden="true" />
+        <X className="h-3.5 w-3.5" />
       </button>
     </div>
   );

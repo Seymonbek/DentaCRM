@@ -15,8 +15,8 @@ const rows: Row[] = [
 ];
 
 const columns: DataTableColumn<Row>[] = [
-  { key: "name", header: "Nomi", sortable: true },
-  { key: "count", header: "Soni", align: "right", sortable: true },
+  { key: "name", header: "Nomi", cell: (r) => r.name, sortable: true },
+  { key: "count", header: "Soni", cell: (r) => r.count, align: "right", sortable: true },
 ];
 
 describe("DataTable", () => {

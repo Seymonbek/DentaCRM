@@ -15,8 +15,7 @@ describe("Pagination", () => {
     render(
       <Pagination page={2} pageSize={10} count={45} onPageChange={() => undefined} />,
     );
-    expect(screen.getByText("11")).toBeInTheDocument();
-    expect(screen.getByText("20")).toBeInTheDocument();
+    expect(screen.getByText("11–20")).toBeInTheDocument();
     expect(screen.getByText(/45/)).toBeInTheDocument();
   });
 

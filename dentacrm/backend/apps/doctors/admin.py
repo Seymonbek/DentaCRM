@@ -2,25 +2,25 @@
 from __future__ import annotations
 
 from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
+from unfold.admin import ModelAdmin, TabularInline
 
 from .models import DoctorProfile, ProcedureType, TimeOff, WorkingHours
 
 
-class WorkingHoursInline(admin.TabularInline):
+class WorkingHoursInline(TabularInline):
     model = WorkingHours
     extra = 0
     fields = ("weekday", "start_time", "end_time")
 
 
-class TimeOffInline(admin.TabularInline):
+class TimeOffInline(TabularInline):
     model = TimeOff
     extra = 0
     fields = ("date_start", "date_end", "reason")
 
 
 @admin.register(DoctorProfile)
-class DoctorProfileAdmin(SimpleHistoryAdmin):
+class DoctorProfileAdmin(ModelAdmin):
     list_display = (
         "user",
         "specialization",
@@ -42,21 +42,21 @@ class DoctorProfileAdmin(SimpleHistoryAdmin):
 
 
 @admin.register(WorkingHours)
-class WorkingHoursAdmin(admin.ModelAdmin):
+class WorkingHoursAdmin(ModelAdmin):
     list_display = ("doctor", "weekday", "start_time", "end_time")
     list_filter = ("weekday",)
     search_fields = ("doctor__user__first_name", "doctor__user__last_name")
 
 
 @admin.register(TimeOff)
-class TimeOffAdmin(admin.ModelAdmin):
+class TimeOffAdmin(ModelAdmin):
     list_display = ("doctor", "date_start", "date_end", "reason")
     list_filter = ("date_start",)
     search_fields = ("doctor__user__first_name", "doctor__user__last_name", "reason")
 
 
 @admin.register(ProcedureType)
-class ProcedureTypeAdmin(SimpleHistoryAdmin):
+class ProcedureTypeAdmin(ModelAdmin):
     list_display = (
         "name",
         "department",
@@ -67,3 +67,4 @@ class ProcedureTypeAdmin(SimpleHistoryAdmin):
     list_filter = ("department", "is_active")
     search_fields = ("name", "department__name")
     autocomplete_fields = ("department",)
+

@@ -32,6 +32,7 @@ from .serializers import (
     TwoFactorEnableSerializer,
     TwoFactorVerifySerializer,
     UserProfileSerializer,
+    UserProfileUpdateSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -129,7 +130,9 @@ class TokenRefreshView(APIView):
 
 
 class MeView(APIView):
-    """GET /api/v1/auth/me/ — return the authenticated user's profile."""
+    """GET /api/v1/auth/me/ — return the authenticated user's profile.
+    PATCH /api/v1/auth/me/ — update the authenticated user's profile.
+    """
 
     permission_classes = [IsAuthenticated]
 
@@ -141,6 +144,23 @@ class MeView(APIView):
     def get(self, request: Request) -> Response:
         serializer = UserProfileSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        tags=["auth"],
+        summary="Update current user profile",
+        request=UserProfileUpdateSerializer,
+        responses={200: UserProfileSerializer, 400: None, 401: None},
+    )
+    def patch(self, request: Request) -> Response:
+        serializer = UserProfileUpdateSerializer(
+            request.user,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(UserProfileSerializer(user).data, status=status.HTTP_200_OK)
 
 
 # ---------------------------------------------------------------------------

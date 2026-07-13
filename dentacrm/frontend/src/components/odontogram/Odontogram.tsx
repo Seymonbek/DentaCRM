@@ -56,14 +56,14 @@ export function Odontogram({
 
   return (
     <figure aria-label="Odontogram" className="w-full">
-      <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="card p-4">
         <ToothRow
           teeth={UPPER_RIGHT.concat(UPPER_LEFT)}
           get={toothOrDefault}
           onSelect={onSelectTooth}
           selected={selectedTooth}
         />
-        <div className="my-2 border-t border-dashed border-slate-200" />
+        <div className="my-2 border-t border-dashed border-border" />
         <ToothRow
           teeth={LOWER_RIGHT.concat(LOWER_LEFT)}
           get={toothOrDefault}
@@ -71,7 +71,7 @@ export function Odontogram({
           selected={selectedTooth}
         />
       </div>
-      <figcaption className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-600">
+      <figcaption className="mt-3 flex flex-wrap items-center gap-4 text-xs text-fg-3">
         {(
           [
             ["healthy", "Sog'lom"],
@@ -118,7 +118,7 @@ function ToothRow({ teeth, get, onSelect, selected }: ToothRowProps): JSX.Elemen
             className={`flex flex-col items-center rounded border transition-colors ${
               isSelected
                 ? "border-brand-600 ring-2 ring-brand-500/40"
-                : "border-slate-200 hover:border-slate-400"
+                : "border-border hover:border-brand-400/50"
             }`}
           >
             <span
@@ -126,7 +126,7 @@ function ToothRow({ teeth, get, onSelect, selected }: ToothRowProps): JSX.Elemen
               className="mt-1 h-6 w-6 rounded-sm"
               style={{ backgroundColor: color }}
             />
-            <span className="text-[10px] font-medium text-slate-700">{n}</span>
+            <span className="text-[10px] font-medium text-fg-2">{n}</span>
           </button>
         );
       })}

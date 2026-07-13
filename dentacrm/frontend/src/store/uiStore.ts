@@ -92,12 +92,33 @@ function writeStoredTheme(pref: ThemePreference): void {
   }
 }
 
+export const COLLAPSED_STORAGE_KEY = "dentacrm.sidebarCollapsed";
+
+export function readStoredCollapsed(): boolean {
+  if (!hasWindow()) return false;
+  try {
+    return window.localStorage.getItem(COLLAPSED_STORAGE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeStoredCollapsed(collapsed: boolean): void {
+  if (!hasWindow()) return;
+  try {
+    window.localStorage.setItem(COLLAPSED_STORAGE_KEY, String(collapsed));
+  } catch {
+    // ignore
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Store definition
 // ---------------------------------------------------------------------------
 export interface UiState {
   // Sidebar / modal
   sidebarOpen: boolean;
+  sidebarCollapsed: boolean;
   activeModal: string | null;
   // Theme
   theme: ThemePreference;
@@ -106,6 +127,8 @@ export interface UiState {
   // Actions
   toggleSidebar: () => void;
   setSidebar: (open: boolean) => void;
+  toggleSidebarCollapsed: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
   openModal: (id: string) => void;
   closeModal: () => void;
   setTheme: (theme: ThemePreference) => void;
@@ -117,15 +140,26 @@ export interface UiState {
 }
 
 const initialPref = readStoredTheme();
+const initialCollapsed = readStoredCollapsed();
 
 export const useUiStore = create<UiState>((set, get) => ({
   sidebarOpen: true,
+  sidebarCollapsed: initialCollapsed,
   activeModal: null,
   theme: initialPref,
   resolvedTheme: resolveTheme(initialPref),
 
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebar: (open) => set({ sidebarOpen: open }),
+  toggleSidebarCollapsed: () => {
+    const next = !get().sidebarCollapsed;
+    writeStoredCollapsed(next);
+    set({ sidebarCollapsed: next });
+  },
+  setSidebarCollapsed: (collapsed) => {
+    writeStoredCollapsed(collapsed);
+    set({ sidebarCollapsed: collapsed });
+  },
   openModal: (id) => set({ activeModal: id }),
   closeModal: () => set({ activeModal: null }),
 
@@ -148,5 +182,6 @@ export const uiSelectors = {
   theme: (s: UiState) => s.theme,
   resolvedTheme: (s: UiState) => s.resolvedTheme,
   sidebarOpen: (s: UiState) => s.sidebarOpen,
+  sidebarCollapsed: (s: UiState) => s.sidebarCollapsed,
   activeModal: (s: UiState) => s.activeModal,
 } as const;

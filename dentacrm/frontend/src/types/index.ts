@@ -24,6 +24,7 @@ export interface User {
    * Optional so pre-T125 mock objects in tests keep compiling.
    */
   twoFactorEnabled?: boolean;
+  telegramChatId?: number | null;
 }
 
 export interface Patient {
@@ -164,3 +165,16 @@ export interface TokenPair {
   refresh: string;
   user: User;
 }
+
+export interface NotificationLog {
+  id: string;
+  userId: string | null;
+  patientId: string | null;
+  type: string;
+  channel: "telegram" | "in_app" | "sms";
+  message: string;
+  status: "pending" | "sent" | "failed";
+  context: Record<string, any>;
+  createdAt: string;
+}
+

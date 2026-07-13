@@ -1,5 +1,4 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
 import { cn } from "@/lib/utils";
 
 interface PaginationProps {
@@ -11,11 +10,6 @@ interface PaginationProps {
   className?: string;
 }
 
-/**
- * Compact pagination bar. Renders "1 – 20 of 45" summary + prev/next
- * buttons. Numeric pager omitted intentionally — the DataTable is
- * usually short and page-number badges add noise on mobile.
- */
 export function Pagination({
   page,
   pageSize,
@@ -24,61 +18,105 @@ export function Pagination({
   isLoading,
   className,
 }: PaginationProps): JSX.Element | null {
-  if (count === 0) return null;
+  const totalPages = Math.ceil(count / pageSize);
+  if (totalPages <= 1) return null;
 
-  const totalPages = Math.max(1, Math.ceil(count / pageSize));
-  const safePage = Math.min(Math.max(page, 1), totalPages);
-  const start = (safePage - 1) * pageSize + 1;
-  const end = Math.min(safePage * pageSize, count);
-  const canPrev = safePage > 1 && !isLoading;
-  const canNext = safePage < totalPages && !isLoading;
+  const from = (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, count);
+
+  const pageNums = buildPageNums(page, totalPages);
 
   return (
-    <nav
+    <div
       className={cn(
-        "flex items-center justify-between gap-2 border-t border-slate-200 bg-white px-4 py-3 text-xs text-slate-600",
+        "flex flex-col items-center gap-3 sm:flex-row sm:justify-between pt-5 border-t border-border",
         className,
       )}
-      aria-label="Sahifalash"
     >
-      <div>
-        <span className="font-medium text-slate-800">{start.toLocaleString("uz-UZ")}</span>
-        <span> – </span>
-        <span className="font-medium text-slate-800">{end.toLocaleString("uz-UZ")}</span>
-        <span> / {count.toLocaleString("uz-UZ")}</span>
-      </div>
+      {/* Count info */}
+      <p className="text-xs text-fg-3 select-none">
+        <span className="font-semibold text-fg-2">{from}–{to}</span>
+        {" "}/ {count.toLocaleString("uz-UZ")} ta natija
+      </p>
+
+      {/* Page buttons */}
       <div className="flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => onPageChange(safePage - 1)}
-          disabled={!canPrev}
-          className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-600 transition-colors",
-            "disabled:cursor-not-allowed disabled:opacity-40 hover:enabled:bg-slate-100",
-          )}
+        <PageBtn
+          onClick={() => onPageChange(page - 1)}
+          disabled={page <= 1 || isLoading}
           aria-label="Oldingi sahifa"
         >
-          <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
-        <span
-          aria-current="page"
-          className="min-w-[3.5rem] rounded-md bg-slate-100 px-2 py-1 text-center font-medium text-slate-800"
-        >
-          {safePage} / {totalPages}
-        </span>
-        <button
-          type="button"
-          onClick={() => onPageChange(safePage + 1)}
-          disabled={!canNext}
-          className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 text-slate-600 transition-colors",
-            "disabled:cursor-not-allowed disabled:opacity-40 hover:enabled:bg-slate-100",
-          )}
+          <ChevronLeft className="h-3.5 w-3.5" />
+        </PageBtn>
+
+        {pageNums.map((n, i) =>
+          n === "…" ? (
+            <span
+              key={`ellipsis-${i}`}
+              className="flex h-8 w-8 items-center justify-center text-xs text-fg-3 select-none"
+            >
+              …
+            </span>
+          ) : (
+            <PageBtn
+              key={n}
+              onClick={() => onPageChange(n as number)}
+              disabled={isLoading}
+              active={n === page}
+              aria-label={`${n}-sahifa`}
+              aria-current={n === page ? "page" : undefined}
+            >
+              {n}
+            </PageBtn>
+          ),
+        )}
+
+        <PageBtn
+          onClick={() => onPageChange(page + 1)}
+          disabled={page >= totalPages || isLoading}
           aria-label="Keyingi sahifa"
         >
-          <ChevronRight className="h-4 w-4" aria-hidden="true" />
-        </button>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </PageBtn>
       </div>
-    </nav>
+    </div>
+  );
+}
+
+// Build page number array with ellipsis
+function buildPageNums(current: number, total: number): (number | "…")[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | "…")[] = [1];
+  if (current > 3) pages.push("…");
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
+    pages.push(i);
+  }
+  if (current < total - 2) pages.push("…");
+  pages.push(total);
+  return pages;
+}
+
+function PageBtn({
+  children,
+  active,
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "flex h-8 w-8 items-center justify-center rounded-xl text-xs font-semibold",
+        "transition-all duration-150 ease-spring select-none",
+        "disabled:opacity-35 disabled:cursor-not-allowed",
+        active
+          ? "btn-gradient text-white shadow-glow-sm"
+          : "text-fg-2 hover:bg-surface-2 hover:text-fg border border-transparent hover:border-border",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
   );
 }

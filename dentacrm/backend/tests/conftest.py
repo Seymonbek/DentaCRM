@@ -21,8 +21,17 @@ Notes
   state into the next test. Dedicated throttling tests in
   ``test_throttling.py`` exercise the limit intentionally within a
   single test function.
+* T133: :data:`MEDIA_ROOT` is redirected to a session-scoped ``tmp_path``
+  so no test can leave orphaned UUID directories behind in
+  ``dentacrm/backend/media/`` (170+ such directories from historical
+  test runs were manually cleaned up in T133). Future ``TreatmentPhoto``
+  uploads land under the pytest temp tree and are wiped automatically
+  when the session ends.
 """
 from __future__ import annotations
+
+import os
+from pathlib import Path
 
 import pytest
 from django.conf import settings
@@ -54,6 +63,9 @@ def _clear_default_cache():
     2. **Reports cache isolation** — the reports app caches aggregate
        payloads under stable keys; wiping between tests avoids stale
        reads across cases that mutate underlying data.
+    3. **T129 idempotency isolation** — the ``IdempotencyMixin`` writes
+       replay entries into the same default cache; wiping stops
+       cross-test leakage.
     """
     # Local import so pytest can collect this module without Django set up.
     from django.core.cache import cache
@@ -61,3 +73,18 @@ def _clear_default_cache():
     cache.clear()
     yield
     cache.clear()
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _redirect_media_root(tmp_path_factory) -> None:
+    """T133 — redirect MEDIA_ROOT to a pytest tmp dir for the whole session.
+
+    Historical runs of the test suite wrote treatment-photo uploads
+    into ``dentacrm/backend/media/treatments/<uuid>/`` and never
+    cleaned them up. This fixture points ``settings.MEDIA_ROOT`` at a
+    session-scoped tmp dir so future runs never dirty the repo.
+    """
+    tmp_root = tmp_path_factory.mktemp("dentacrm-media")
+    settings.MEDIA_ROOT = str(tmp_root)
+    yield
+    # tmp_path_factory cleans up automatically at session end.

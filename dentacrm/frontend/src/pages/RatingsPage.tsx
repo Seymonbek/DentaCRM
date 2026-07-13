@@ -1,12 +1,21 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
+import { Medal, Trophy } from "lucide-react";
 
 import { getLeaderboard, type LeaderboardEntry } from "@/api/ratings";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { cn } from "@/lib/utils";
+
+const MEDAL_COLORS = [
+  "text-yellow-500",  // 1st
+  "text-slate-400",   // 2nd
+  "text-amber-600",   // 3rd
+];
 
 export function RatingsPage(): JSX.Element {
   const currentMonth = format(new Date(), "yyyy-MM");
@@ -14,86 +23,127 @@ export function RatingsPage(): JSX.Element {
 
   const leaderboard = useQuery<LeaderboardEntry[]>({
     queryKey: ["ratings", "leaderboard", period],
-    queryFn: () => getLeaderboard(period || undefined),
+    queryFn:  () => getLeaderboard(period || undefined),
   });
 
+  const rows = leaderboard.data ?? [];
+
   return (
-    <section aria-labelledby="page-title" className="mx-auto max-w-4xl">
-      <div className="mb-6">
-        <h1
-          id="page-title"
-          className="text-2xl font-semibold text-slate-900"
-        >
-          Reyting
-        </h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Shifokorlarning oylik ballari va reyting o'rni.
-        </p>
-      </div>
+    <section aria-labelledby="ratings-title" className="max-w-3xl space-y-6">
+      <PageHeader
+        title="Reyting"
+        description="Shifokorlarning oylik ballari va reyting o'rni."
+        actions={
+          <div>
+            <Label htmlFor="rating-period" className="sr-only">Davr</Label>
+            <Input
+              id="rating-period"
+              type="month"
+              value={period}
+              className="w-44"
+              onChange={(e) => setPeriod(e.target.value)}
+            />
+          </div>
+        }
+      />
 
-      <div className="mb-4 flex items-end gap-3">
-        <div>
-          <Label htmlFor="period">Davr (YYYY-MM)</Label>
-          <Input
-            id="period"
-            type="month"
-            value={period}
-            onChange={(e) => setPeriod(e.target.value)}
+      {/* Podium — top 3 */}
+      {!leaderboard.isLoading && rows.length >= 3 && (
+        <div className="grid grid-cols-3 gap-3">
+          {rows.slice(0, 3).map((row, i) => (
+            <div
+              key={row.doctorId}
+              className={cn(
+                "card flex flex-col items-center gap-2 p-5 text-center",
+                i === 0 ? "ring-2 ring-yellow-400/40 shadow-md" : "",
+              )}
+            >
+              <Medal
+                className={cn("h-6 w-6", MEDAL_COLORS[i] ?? "text-fg-3")}
+                aria-hidden="true"
+              />
+              <span className="text-xs font-bold text-fg-3">#{row.rank}</span>
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-600/10 text-brand-600 dark:bg-brand-600/20 dark:text-brand-400 text-sm font-bold">
+                {row.firstName?.[0]}{row.lastName?.[0]}
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-fg leading-tight">{row.firstName} {row.lastName}</p>
+                <p className="text-xs text-fg-3">{row.specialization || "—"}</p>
+              </div>
+              <span className="text-xl font-bold text-brand-600 dark:text-brand-400">{row.totalPoints}</span>
+              <span className="text-[10px] text-fg-3">ball</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Full table */}
+      <div className="card overflow-hidden">
+        {leaderboard.isLoading ? (
+          <div className="p-4 space-y-2" aria-hidden="true">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-14 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : rows.length === 0 ? (
+          <EmptyState
+            title="Ma'lumot yo'q"
+            description="Tanlangan davr uchun reyting bo'sh."
+            icon={<Trophy className="h-6 w-6" aria-hidden="true" />}
           />
-        </div>
-      </div>
-
-      {leaderboard.isLoading && (
-        <div className="space-y-2" aria-hidden="true">
-          <Skeleton className="h-14" />
-          <Skeleton className="h-14" />
-          <Skeleton className="h-14" />
-        </div>
-      )}
-
-      {!leaderboard.isLoading && (leaderboard.data ?? []).length === 0 && (
-        <EmptyState
-          title="Ma'lumot yo'q"
-          description="Tanlangan davr uchun reyting bo'sh."
-        />
-      )}
-
-      {!leaderboard.isLoading && (leaderboard.data ?? []).length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-3">O'rni</th>
-                <th className="px-4 py-3">Shifokor</th>
-                <th className="px-4 py-3">Mutaxassislik</th>
-                <th className="px-4 py-3 text-right">Yozuvlar</th>
-                <th className="px-4 py-3 text-right">Ballar</th>
+            <thead>
+              <tr className="border-b border-border bg-surface-2/60">
+                {["#", "Shifokor", "Mutaxassislik", "Yozuvlar", "Ballar"].map((h, i) => (
+                  <th
+                    key={h}
+                    className={cn(
+                      "px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-fg-3",
+                      i >= 3 ? "text-right" : "text-left",
+                    )}
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {leaderboard.data?.map((row) => (
-                <tr key={row.doctorId} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-semibold text-slate-900">
-                    {row.rank}
+            <tbody>
+              {rows.map((row, i) => (
+                <tr
+                  key={row.doctorId}
+                  className="border-b border-border-2 last:border-none transition-colors hover:bg-surface-2/60"
+                >
+                  <td className="px-4 py-3 w-10">
+                    <span className={cn(
+                      "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold",
+                      i === 0 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
+                      : i === 1 ? "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                      : i === 2 ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                      : "bg-surface-2 text-fg-3",
+                    )}>
+                      {row.rank}
+                    </span>
                   </td>
-                  <td className="px-4 py-3 text-slate-900">
-                    {row.firstName} {row.lastName}
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600/10 text-brand-600 dark:text-brand-400 text-[11px] font-bold">
+                        {row.firstName?.[0]}{row.lastName?.[0]}
+                      </span>
+                      <span className="font-medium text-fg">{row.firstName} {row.lastName}</span>
+                    </div>
                   </td>
-                  <td className="px-4 py-3 text-slate-600">
-                    {row.specialization || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-right text-slate-600">
-                    {row.entries}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-brand-700">
+                  <td className="px-4 py-3 text-fg-3">{row.specialization || "—"}</td>
+                  <td className="px-4 py-3 text-right text-fg-2">{row.entries}</td>
+                  <td className="px-4 py-3 text-right font-bold text-brand-600 dark:text-brand-400">
                     {row.totalPoints}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 }

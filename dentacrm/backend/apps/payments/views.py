@@ -28,6 +28,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.core.idempotency import IdempotencyMixin
 from apps.core.permissions import (
     ROLE_DOCTOR,
 )
@@ -89,9 +90,34 @@ def _parse_date(raw: str | None, *, field: str) -> datetime | None:
 # ===========================================================================
 # PaymentViewSet — /api/v1/payments/
 # ===========================================================================
-@extend_schema(tags=["payments"])
-class PaymentViewSet(viewsets.ModelViewSet):
-    """CRUD for :class:`Payment`."""
+@extend_schema(
+    tags=["payments"],
+    parameters=[
+        OpenApiParameter(
+            name="Idempotency-Key",
+            required=False,
+            type=str,
+            location=OpenApiParameter.HEADER,
+            description=(
+                "T129 — client-generated retry key. Same key + same body "
+                "replays the cached response of the first successful call; "
+                "same key + different body returns 409. Cached for 24 hours."
+            ),
+        ),
+    ],
+)
+class PaymentViewSet(IdempotencyMixin, viewsets.ModelViewSet):
+    """CRUD for :class:`Payment`.
+
+    T129 — :class:`~apps.core.idempotency.IdempotencyMixin` makes
+    ``POST /api/v1/payments/`` idempotent when the client sends an
+    ``Idempotency-Key`` header. Recording a payment is the single
+    highest-risk write in the app (money movement + commission recalc
+    + audit log), so a network retry MUST NOT double-record.
+    """
+
+    #: Actions this viewset should treat as idempotent.
+    idempotent_actions = {"create"}
 
     serializer_class = PaymentSerializer
     permission_classes = [PaymentPermission]

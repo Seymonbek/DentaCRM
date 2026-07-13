@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import ToothRecord
 
 
 @admin.register(ToothRecord)
-class ToothRecordAdmin(admin.ModelAdmin):
+class ToothRecordAdmin(ModelAdmin):
     list_display = (
         "id",
         "treatment",
@@ -26,3 +27,4 @@ class ToothRecordAdmin(admin.ModelAdmin):
     )
     autocomplete_fields = ("treatment",)
     readonly_fields = ("id", "created_at", "updated_at")
+

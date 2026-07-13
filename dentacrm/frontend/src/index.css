@@ -1,150 +1,679 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ==========================================================================
-   Theme tokens (HSL — Tailwind uses `hsl(var(--x) / <alpha-value>)`)
+/* ================================================================
+   DENTACRM — iPhone-Grade Glassmorphism Design System
+   Inspired by: iOS 17 · visionOS · Apple Design Language
+   ================================================================ */
 
-   PROJECT_BRIEF § "Design System" specifies concrete hex values; the
-   values below match those hex codes converted to HSL triplets:
+:root {
+  /* ── Page background — very subtle warm-indigo tint ─────────── */
+  --color-bg:        230 22% 96%;
+  --color-surface:   0 0% 100%;
+  --color-surface-2: 228 18% 95%;
+  --color-surface-3: 228 16% 91%;
 
-     Light:
-       primary            #2563EB  221 83% 53%
-       primary-foreground #FFFFFF    0  0% 100%
-       success            #16A34A  142 71% 36%
-       warning            #D97706   32 95% 44%
-       danger             #DC2626    0 84% 50%
-       background         #FFFFFF    0  0% 100%
-       surface            #F8FAFC  210 40% 98%
-       border             #E2E8F0  214 32% 91%
-       foreground         #1E293B  222 47% 17%
-       muted (text)       #64748B  215 16% 47%
+  /* ── Borders ────────────────────────────────────────────────── */
+  --color-border:    228 15% 87%;
+  --color-border-2:  228 15% 92%;
 
-     Dark:
-       primary            #3B82F6  217 91% 60%
-       background         #0F172A  222 47% 11%
-       surface            #1E293B  222 47% 17%
-       border             #334155  215 25% 27%
-       foreground         #E2E8F0  214 32% 91%
-   ========================================================================== */
+  /* ── Text ───────────────────────────────────────────────────── */
+  --color-fg:        224 71% 8%;
+  --color-fg-2:      222 30% 28%;
+  --color-fg-3:      220 18% 50%;
 
-@layer base {
-  :root {
-    --color-primary: 221 83% 53%; /* #2563EB */
-    --color-primary-foreground: 0 0% 100%;
+  /* ── Brand — Apple-style violet ─────────────────────────────── */
+  --color-primary:    251 91% 60%;
+  --color-primary-fg: 0 0% 100%;
 
-    --color-background: 0 0% 100%; /* #FFFFFF */
-    --color-surface: 210 40% 98%; /* #F8FAFC */
-    --color-border: 214 32% 91%; /* #E2E8F0 */
-    --color-ring: 221 83% 53%;
+  /* ── Semantic ───────────────────────────────────────────────── */
+  --color-success:    155 65% 35%;
+  --color-success-bg: 155 60% 94%;
+  --color-warning:    35 90% 48%;
+  --color-warning-bg: 45 100% 92%;
+  --color-danger:     3 88% 56%;
+  --color-danger-bg:  3 88% 96%;
 
-    --color-foreground: 222 47% 17%; /* #1E293B */
-    --color-muted: 210 40% 96%;
-    --color-muted-foreground: 215 16% 47%; /* #64748B */
+  /* ── iOS-style glass (light) ─────────────────────────────────── */
+  --glass-bg:        rgba(255, 255, 255, 0.68);
+  --glass-border:    rgba(255, 255, 255, 0.80);
+  --glass-blur:      24px;
+  --glass-saturate:  190%;
 
-    --color-success: 142 71% 36%; /* #16A34A */
-    --color-success-foreground: 0 0% 100%;
-    --color-warning: 32 95% 44%; /* #D97706 */
-    --color-warning-foreground: 0 0% 100%;
-    --color-danger: 0 84% 50%; /* #DC2626 */
-    --color-danger-foreground: 0 0% 100%;
-
-    color-scheme: light;
-  }
-
-  .dark {
-    --color-primary: 217 91% 60%; /* #3B82F6 */
-    --color-primary-foreground: 0 0% 100%;
-
-    --color-background: 222 47% 11%; /* #0F172A */
-    --color-surface: 222 47% 17%; /* #1E293B */
-    --color-border: 215 25% 27%; /* #334155 */
-    --color-ring: 217 91% 60%;
-
-    --color-foreground: 214 32% 91%; /* #E2E8F0 */
-    --color-muted: 222 47% 20%;
-    --color-muted-foreground: 215 16% 65%;
-
-    --color-success: 142 76% 45%; /* #22C55E */
-    --color-success-foreground: 0 0% 100%;
-    --color-warning: 38 92% 50%; /* #F59E0B */
-    --color-warning-foreground: 0 0% 100%;
-    --color-danger: 0 91% 63%; /* #EF4444 */
-    --color-danger-foreground: 0 0% 100%;
-
-    color-scheme: dark;
-  }
-
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family:
-      "Inter",
-      ui-sans-serif,
-      system-ui,
-      -apple-system,
-      "Segoe UI",
-      Roboto,
-      sans-serif;
-    transition:
-      background-color 200ms ease,
-      color 200ms ease;
-  }
-
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-brand-500;
-  }
+  /* ── Shadows ────────────────────────────────────────────────── */
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 12px 40px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.05);
+  --shadow-glow: 0 0 32px -4px rgba(100, 60, 255, 0.32);
+  --shadow-glow-sm: 0 0 16px -2px rgba(100, 60, 255, 0.22);
 }
 
-/* ==========================================================================
-   Component primitives — reusable classnames used by shared components
-   before shadcn/ui variants are wired up.
-   ========================================================================== */
-@layer components {
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
-           transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500
-           disabled:pointer-events-none disabled:opacity-50;
-  }
+/* ── Dark mode — true iOS dark ─────────────────────────────────── */
+.dark {
+  --color-bg:        228 32% 6%;
+  --color-surface:   228 26% 9%;
+  --color-surface-2: 228 24% 12%;
+  --color-surface-3: 228 22% 15%;
 
-  .btn-primary {
-    @apply btn bg-brand-600 text-white hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-400;
-  }
+  --color-border:    228 20% 18%;
+  --color-border-2:  228 20% 14%;
 
-  .btn-secondary {
-    @apply btn bg-slate-200 text-slate-900 hover:bg-slate-300
-           dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600;
-  }
+  --color-fg:        210 40% 97%;
+  --color-fg-2:      220 24% 74%;
+  --color-fg-3:      220 18% 46%;
 
-  .btn-ghost {
-    @apply btn bg-transparent text-slate-700 hover:bg-slate-100
-           dark:text-slate-200 dark:hover:bg-slate-800;
-  }
+  --color-primary:    251 91% 67%;
+  --color-primary-fg: 0 0% 100%;
 
-  .input {
-    @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm
-           placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2
-           focus:ring-brand-500/40 disabled:bg-slate-100 disabled:text-slate-500
-           dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500
-           dark:disabled:bg-slate-800;
-  }
+  --color-success:    155 58% 50%;
+  --color-success-bg: 155 40% 8%;
+  --color-warning:    35 90% 56%;
+  --color-warning-bg: 35 50% 8%;
+  --color-danger:     3 88% 60%;
+  --color-danger-bg:  3 40% 9%;
 
-  .card {
-    @apply rounded-xl border border-slate-200 bg-white shadow-sm
-           dark:border-slate-700 dark:bg-slate-800;
-  }
+  /* visionOS-style dark glass */
+  --glass-bg:        rgba(20, 17, 38, 0.72);
+  --glass-border:    rgba(255, 255, 255, 0.07);
+  --glass-blur:      28px;
+  --glass-saturate:  160%;
 
-  .label {
-    @apply mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200;
-  }
-
-  .skeleton {
-    @apply block h-4 w-full rounded-md bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200
-           bg-[length:200%_100%] animate-shimmer
-           dark:from-slate-800 dark:via-slate-700 dark:to-slate-800;
-  }
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.32), 0 2px 8px rgba(0,0,0,0.20);
+  --shadow-md:   0 4px 20px rgba(0,0,0,0.42), 0 2px 6px rgba(0,0,0,0.24);
+  --shadow-lg:   0 16px 52px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.30);
+  --shadow-glow: 0 0 40px -4px rgba(120, 80, 255, 0.52);
+  --shadow-glow-sm: 0 0 20px -2px rgba(120, 80, 255, 0.38);
 }
+
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  border-color: hsl(var(--color-border));
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: hsl(var(--color-bg));
+  color: hsl(var(--color-fg));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Outfit", "SF Pro Display", "Inter", system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: hsl(var(--color-fg));
+}
+
+/* ================================================================
+   KEYFRAMES — Apple spring physics
+   ================================================================ */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94) translateY(4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes slide-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* Aurora orb animations */
+@keyframes orb-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33%       { transform: translate(50px, -40px) scale(1.10); }
+  66%       { transform: translate(-30px, 25px) scale(0.94); }
+}
+@keyframes orb-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  40%       { transform: translate(-55px, 35px) scale(0.93); }
+  70%       { transform: translate(35px, -45px) scale(1.08); }
+}
+@keyframes orb-3 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  50%       { transform: translate(30px, 40px) scale(1.06); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes toast-slide {
+  from { opacity: 0; transform: translateX(30px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* iPhone liquid ripple */
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.4; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ================================================================
+   ANIMATION UTILITIES
+   ================================================================ */
+
+.animate-in         { animation: fade-up 300ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-scale-in   { animation: scale-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-right{ animation: slide-right 280ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-pulse-soft { animation: pulse-soft 2.5s ease-in-out infinite; }
+.animate-toast-in   { animation: toast-slide 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.stagger > *:nth-child(1) { animation-delay:  0ms; }
+.stagger > *:nth-child(2) { animation-delay: 55ms; }
+.stagger > *:nth-child(3) { animation-delay: 110ms; }
+.stagger > *:nth-child(4) { animation-delay: 165ms; }
+.stagger > *:nth-child(5) { animation-delay: 220ms; }
+.stagger > *:nth-child(6) { animation-delay: 275ms; }
+
+/* ================================================================
+   iOS GLASSMORPHISM SYSTEM
+   The secret: layered blur + subtle inner highlights + depth shadow
+   ================================================================ */
+
+/* Base glass — Apple Liquid Glass */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+}
+
+/* Premium glass card — visionOS style */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-radius: 22px;
+  /* Layered borders: outer edge + top inner highlight */
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    var(--shadow-md),
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -1px 0 rgba(0,0,0,0.04);
+  transition: box-shadow 300ms cubic-bezier(0.16,1,0.3,1),
+              transform 300ms cubic-bezier(0.16,1,0.3,1),
+              border-color 200ms;
+}
+
+.glass-card:hover {
+  box-shadow:
+    var(--shadow-lg),
+    var(--shadow-glow-sm),
+    inset 0 1px 0 rgba(255,255,255,0.65),
+    inset 0 -1px 0 rgba(0,0,0,0.04);
+  transform: translateY(-3px);
+  border-color: rgba(120, 80, 255, 0.28);
+}
+
+/* ================================================================
+   STANDARD CARDS — frosted glass lite
+   ================================================================ */
+
+.card {
+  background: hsl(var(--color-surface));
+  border: 1px solid hsl(var(--color-border));
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.6);
+  transition:
+    box-shadow 250ms cubic-bezier(0.16,1,0.3,1),
+    transform   250ms cubic-bezier(0.16,1,0.3,1),
+    border-color 200ms;
+}
+
+.dark .card {
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.card:hover { box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.6); }
+
+.card-interactive {
+  background: hsl(var(--color-surface));
+  border: 1px solid hsl(var(--color-border));
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition:
+    box-shadow 250ms cubic-bezier(0.16,1,0.3,1),
+    transform   250ms cubic-bezier(0.16,1,0.3,1),
+    border-color 200ms;
+}
+
+.card-interactive:hover {
+  box-shadow: var(--shadow-md), var(--shadow-glow-sm), inset 0 1px 0 rgba(255,255,255,0.65);
+  transform: translateY(-2px);
+  border-color: hsl(var(--color-primary) / 0.30);
+}
+
+/* ================================================================
+   AURORA BACKGROUND (Login · full-page forms)
+   ================================================================ */
+
+.ambient-bg {
+  position: relative;
+  background: hsl(var(--color-bg));
+  overflow: hidden;
+}
+
+/* Richer dark mode aurora */
+.dark .ambient-bg {
+  background: radial-gradient(ellipse at 15% 55%, hsl(251 70% 7%) 0%, hsl(228 32% 5%) 65%);
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+  pointer-events: none;
+  mix-blend-mode: normal;
+}
+
+.dark .ambient-orb { opacity: 0.32; }
+
+.orb-1 {
+  width: 650px; height: 650px;
+  background: radial-gradient(circle at 30% 40%, rgba(110, 60, 255, 0.55) 0%, transparent 65%);
+  top: -220px; left: -120px;
+  animation: orb-1 20s ease-in-out infinite;
+}
+.orb-2 {
+  width: 520px; height: 520px;
+  background: radial-gradient(circle at 60% 60%, rgba(168, 85, 247, 0.45) 0%, transparent 65%);
+  bottom: -160px; right: -100px;
+  animation: orb-2 25s ease-in-out infinite;
+}
+.orb-3 {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.35) 0%, transparent 65%);
+  top: 38%; right: 22%;
+  animation: orb-3 16s ease-in-out infinite;
+}
+/* Extra pink orb for more vibrancy */
+.orb-4 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle at 50% 50%, rgba(236, 72, 153, 0.28) 0%, transparent 65%);
+  top: 60%; left: 5%;
+  animation: orb-1 19s ease-in-out infinite reverse;
+}
+
+/* ================================================================
+   GRADIENT TEXT — Apple-style iridescent
+   ================================================================ */
+
+.gradient-text {
+  background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 45%, #60a5fa 80%, #7c3aed 100%);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* ================================================================
+   BADGES — iOS pill style
+   ================================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.badge-green {
+  background: hsl(var(--color-success-bg));
+  color: hsl(var(--color-success));
+  border: 1px solid hsl(var(--color-success) / 0.22);
+}
+.badge-amber {
+  background: hsl(var(--color-warning-bg));
+  color: hsl(var(--color-warning));
+  border: 1px solid hsl(var(--color-warning) / 0.22);
+}
+.badge-danger {
+  background: hsl(var(--color-danger-bg));
+  color: hsl(var(--color-danger));
+  border: 1px solid hsl(var(--color-danger) / 0.22);
+}
+.badge-blue {
+  background: hsl(251 91% 97%);
+  color: hsl(251 91% 42%);
+  border: 1px solid hsl(251 91% 60% / 0.22);
+}
+.badge-violet {
+  background: linear-gradient(135deg, hsl(251 91% 60% / 0.10), hsl(280 80% 60% / 0.10));
+  color: hsl(251 91% 55%);
+  border: 1px solid hsl(251 91% 60% / 0.22);
+}
+.badge-muted {
+  background: hsl(var(--color-surface-2));
+  color: hsl(var(--color-fg-3));
+  border: 1px solid hsl(var(--color-border));
+}
+
+.dark .badge-blue   { background: hsl(251 70% 16%); color: hsl(251 91% 78%); }
+.dark .badge-violet { background: hsl(265 60% 14%); color: hsl(265 80% 75%); }
+
+/* ================================================================
+   FORM ELEMENTS — iOS rounded style
+   ================================================================ */
+
+.select-field {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid hsl(var(--color-border));
+  background: hsl(var(--color-surface));
+  padding: 9px 36px 9px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: hsl(var(--color-fg));
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%238b94a8' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  transition: border-color 180ms, box-shadow 180ms;
+  cursor: pointer;
+}
+
+.select-field:focus {
+  border-color: hsl(var(--color-primary));
+  box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.15);
+}
+
+.select-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.textarea-field {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid hsl(var(--color-border));
+  background: hsl(var(--color-surface));
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: hsl(var(--color-fg));
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color 180ms, box-shadow 180ms;
+}
+
+.textarea-field:focus {
+  border-color: hsl(var(--color-primary));
+  box-shadow: 0 0 0 3px hsl(var(--color-primary) / 0.15);
+}
+
+.textarea-field::placeholder,
+.select-field > option[value=""] {
+  color: hsl(var(--color-fg-3));
+}
+
+/* ================================================================
+   FIELD ERROR / HELPER
+   ================================================================ */
+
+.field-error {
+  margin-top: 5px;
+  font-size: 12px;
+  color: hsl(var(--color-danger));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ================================================================
+   SECTION DIVIDER
+   ================================================================ */
+
+.section-divider {
+  border: none;
+  border-top: 1px solid hsl(var(--color-border));
+  margin: 24px 0;
+}
+
+/* ================================================================
+   SCROLLBAR — minimal iOS style
+   ================================================================ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--color-border)) transparent;
+}
+*::-webkit-scrollbar        { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track  { background: transparent; }
+*::-webkit-scrollbar-thumb  { background: hsl(var(--color-border-2)); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background: hsl(var(--color-fg-3)); }
+
+/* ================================================================
+   SELECTION
+   ================================================================ */
+
+::selection {
+  background: hsl(var(--color-primary) / 0.18);
+  color: hsl(var(--color-fg));
+}
+
+/* ================================================================
+   SIDEBAR NAV ITEM — active state
+   ================================================================ */
+
+.nav-item-active {
+  position: relative;
+  background: linear-gradient(
+    120deg,
+    hsl(251 91% 60% / 0.13) 0%,
+    hsl(280 80% 60% / 0.08) 100%
+  );
+  color: hsl(251 91% 68%);
+  border: 1px solid hsl(251 91% 60% / 0.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.nav-item-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 56%;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #7c3aed, #a78bfa);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.6);
+}
+
+/* ================================================================
+   GRADIENT BUTTON — Apple-style specular shine
+   ================================================================ */
+
+.btn-gradient {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 40%, #9b59f5 70%, #7c3aed 100%);
+  background-size: 200% auto;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  /* specular highlight on top */
+  box-shadow:
+    0 4px 16px rgba(109, 40, 217, 0.42),
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.10);
+  transition:
+    background-position 400ms ease,
+    transform 160ms cubic-bezier(0.16,1,0.3,1),
+    box-shadow 250ms ease;
+}
+
+.btn-gradient:hover:not(:disabled) {
+  background-position: right center;
+  transform: translateY(-1px) scale(1.01);
+  box-shadow:
+    0 8px 24px rgba(109, 40, 217, 0.52),
+    inset 0 1px 0 rgba(255,255,255,0.28),
+    inset 0 -1px 0 rgba(0,0,0,0.10);
+}
+
+.btn-gradient:active:not(:disabled) {
+  transform: scale(0.97) translateY(0);
+  box-shadow:
+    0 2px 8px rgba(109, 40, 217, 0.32),
+    inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+/* ================================================================
+   SKELETON SHIMMER — iOS grey shimmer
+   ================================================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--color-surface-2)) 25%,
+    hsl(var(--color-surface-3)) 50%,
+    hsl(var(--color-surface-2)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+  border-radius: 10px;
+}
+
+/* ================================================================
+   PAGE TRANSITIONS
+   ================================================================ */
+
+.page-enter { animation: fade-up 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* ================================================================
+   KPI CARD ACCENT — subtle light leak
+   ================================================================ */
+
+.kpi-card-accent {
+  position: relative;
+  overflow: hidden;
+}
+
+/* top-right glow spot */
+.kpi-card-accent::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120,80,255,0.12) 0%, transparent 70%);
+  transition: opacity 300ms;
+  pointer-events: none;
+}
+
+.kpi-card-accent:hover::before {
+  opacity: 1.5;
+}
+
+/* ================================================================
+   IPHONE LIQUID GLASS EFFECT — specular shine layer
+   Used on sidebar, header, modals
+   ================================================================ */
+
+.liquid-glass {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+}
+
+/* The specular shine that makes it look like a real glass surface */
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.18) 0%,
+    rgba(255,255,255,0.04) 30%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ================================================================
+   AURORA GLOW — interactive hover glow rings
+   ================================================================ */
+
+@keyframes aurora-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.04); }
+}
+
+.aurora-glow {
+  position: relative;
+}
+
+.aurora-glow::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa, #60a5fa, #7c3aed);
+  background-size: 300% 300%;
+  opacity: 0;
+  z-index: -1;
+  filter: blur(8px);
+  transition: opacity 300ms;
+  animation: gradient-shift 6s ease infinite;
+}
+
+.aurora-glow:hover::after { opacity: 0.5; }

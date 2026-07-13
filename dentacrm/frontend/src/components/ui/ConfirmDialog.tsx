@@ -1,18 +1,20 @@
-import type { ReactNode } from "react";
-
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "./Button";
 import { Modal } from "./Modal";
 
 interface ConfirmDialogProps {
   open: boolean;
-  title: ReactNode;
-  description?: ReactNode;
+  title: string;
+  description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
   destructive?: boolean;
+  /** Both 'isLoading' and legacy 'loading' are accepted */
+  isLoading?: boolean;
   loading?: boolean;
   onConfirm: () => void;
-  onClose: () => void;
+  onCancel?: () => void;
+  onClose?: () => void;
 }
 
 export function ConfirmDialog({
@@ -21,40 +23,56 @@ export function ConfirmDialog({
   description,
   confirmLabel = "Tasdiqlash",
   cancelLabel = "Bekor qilish",
-  destructive,
+  destructive = false,
+  isLoading,
   loading,
   onConfirm,
+  onCancel,
   onClose,
 }: ConfirmDialogProps): JSX.Element {
+  const busy = isLoading ?? loading ?? false;
+  const handleClose = onCancel ?? onClose ?? (() => undefined);
+
   return (
     <Modal
       open={open}
-      onClose={loading ? () => undefined : onClose}
       title={title}
-      description={description}
       size="sm"
+      onClose={busy ? () => undefined : handleClose}
       footer={
         <>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-            disabled={loading}
-          >
+          <Button variant="secondary" size="md" onClick={handleClose} disabled={busy}>
             {cancelLabel}
           </Button>
           <Button
-            type="button"
             variant={destructive ? "destructive" : "primary"}
+            size="md"
             onClick={onConfirm}
-            disabled={loading}
+            disabled={busy}
+            aria-busy={busy}
           >
-            {loading ? "Bajarilmoqda…" : confirmLabel}
+            {destructive && !busy && <Trash2 className="h-3.5 w-3.5" />}
+            {busy ? "Bajarilmoqda…" : confirmLabel}
           </Button>
         </>
       }
     >
-      {null}
+      <div className="flex items-start gap-4">
+        {destructive ? (
+          <div
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+            style={{
+              background: "hsl(var(--color-danger-bg))",
+              border: "1px solid hsl(var(--color-danger) / 0.20)",
+            }}
+          >
+            <AlertTriangle className="h-5 w-5 text-danger" />
+          </div>
+        ) : null}
+        {description ? (
+          <p className="text-sm text-fg-2 leading-relaxed pt-1.5 flex-1">{description}</p>
+        ) : null}
+      </div>
     </Modal>
   );
 }

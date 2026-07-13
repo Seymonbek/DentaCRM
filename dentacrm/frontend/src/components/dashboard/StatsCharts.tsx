@@ -56,17 +56,17 @@ export function StatsCharts({ period = "week" }: StatsChartsProps): JSX.Element 
   });
 
   const revenueSeries =
-    revenue.data?.byDay.map((row) => ({
+    revenue.data?.byDay?.map((row) => ({
       date: row.date,
       amount: Number(row.amount),
     })) ?? [];
   const procedureRows =
-    procedures.data?.items.map((row) => ({
+    procedures.data?.items?.map((row) => ({
       name: row.procedure,
       count: row.count,
     })) ?? [];
   const departmentRows =
-    departments.data?.items.map((row) => ({
+    departments.data?.items?.map((row) => ({
       name: row.department,
       revenue: Number(row.revenue),
     })) ?? [];

@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
+from unfold.admin import ModelAdmin
 
 from .models import Patient
 
 
 @admin.register(Patient)
-class PatientAdmin(SimpleHistoryAdmin):
+class PatientAdmin(ModelAdmin):
     list_display = (
         "last_name",
         "first_name",
@@ -22,3 +22,4 @@ class PatientAdmin(SimpleHistoryAdmin):
     autocomplete_fields = ("created_by",)
     readonly_fields = ("created_at", "updated_at")
     ordering = ("last_name", "first_name")
+

@@ -116,5 +116,20 @@ def process_treatment_photo(self, photo_id: str) -> str:  # noqa: ARG001
         return "error"
 
 
-__all__ = ["process_treatment_photo", "THUMB_MAX_DIM"]
+__all__ = ["process_treatment_photo", "THUMB_MAX_DIM", "sweep_orphan_photos"]
 _ = Path  # keep import for downstream extension without churn
+
+
+@shared_task(name="apps.treatments.tasks.sweep_orphan_photos")
+def sweep_orphan_photos() -> str:
+    """T133 — periodic media-hygiene sweep.
+
+    Wraps ``manage.py orphan_photo_cleanup --apply`` so Celery Beat can
+    run it on a schedule. Deletes files under ``MEDIA_ROOT/treatments/``
+    that no live :class:`TreatmentPhoto` row references. Idempotent:
+    a second run finds nothing to remove.
+    """
+    from django.core.management import call_command
+
+    call_command("orphan_photo_cleanup", "--apply", verbosity=0)
+    return "ok"

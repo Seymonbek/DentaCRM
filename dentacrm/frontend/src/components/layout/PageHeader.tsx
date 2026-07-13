@@ -4,28 +4,41 @@ interface PageHeaderProps {
   title: string;
   description?: string;
   actions?: ReactNode;
+  /** Optional icon to display left of the title */
+  icon?: ReactNode;
 }
 
-/**
- * Standard page header shared by every content page. Keeps title,
- * subtitle, and right-side action buttons aligned across the app.
- */
-export function PageHeader({
-  title,
-  description,
-  actions,
-}: PageHeaderProps): JSX.Element {
+export function PageHeader({ title, description, actions, icon }: PageHeaderProps): JSX.Element {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-      <div className="min-w-0">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          {title}
-        </h1>
-        {description ? (
-          <p className="mt-1 text-sm text-slate-600">{description}</p>
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between animate-in">
+      <div className="flex items-start gap-4 min-w-0">
+        {/* Optional icon badge */}
+        {icon ? (
+          <div
+            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-violet-400"
+            style={{
+              background: "linear-gradient(135deg, hsl(252 87% 62% / 0.15), hsl(280 80% 60% / 0.10))",
+              border: "1px solid hsl(252 87% 62% / 0.20)",
+            }}
+          >
+            {icon}
+          </div>
         ) : null}
+        <div>
+          <h1 className="text-[22px] font-display font-bold tracking-tight text-fg leading-tight">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-1.5 text-sm text-fg-3 leading-relaxed max-w-xl">
+              {description}
+            </p>
+          ) : null}
+        </div>
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+
+      {actions ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2.5">{actions}</div>
+      ) : null}
     </div>
   );
 }

@@ -4,12 +4,14 @@ from __future__ import annotations
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as DjangoUserAdmin
 from django.utils.translation import gettext_lazy as _
+from unfold.admin import ModelAdmin
+from unfold.forms import UserChangeForm, UserCreationForm
 
 from .models import OTPCode, User
 
 
 @admin.register(User)
-class UserAdmin(DjangoUserAdmin):
+class UserAdmin(DjangoUserAdmin, ModelAdmin):
     """Admin for the custom User model.
 
     We reuse Django's UserAdmin infrastructure but rewrite the fieldsets
@@ -17,6 +19,9 @@ class UserAdmin(DjangoUserAdmin):
     ``two_factor_enabled``). The default admin form is left intact for
     superuser creation via ``createsuperuser``.
     """
+
+    form = UserChangeForm
+    add_form = UserCreationForm
 
     ordering = ("last_name", "first_name")
     list_display = ("phone_number", "first_name", "last_name", "role", "is_active")
@@ -69,9 +74,10 @@ class UserAdmin(DjangoUserAdmin):
 
 
 @admin.register(OTPCode)
-class OTPCodeAdmin(admin.ModelAdmin):
+class OTPCodeAdmin(ModelAdmin):
     list_display = ("user", "purpose", "is_used", "expires_at", "created_at")
     list_filter = ("purpose", "is_used")
     search_fields = ("user__phone_number",)
     autocomplete_fields = ("user",)
     readonly_fields = ("created_at",)
+

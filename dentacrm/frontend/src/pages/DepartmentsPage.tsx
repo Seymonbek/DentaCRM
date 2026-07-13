@@ -72,12 +72,12 @@ export function DepartmentsPage(): JSX.Element {
       sortable: true,
       cell: (row) => (
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-md bg-brand-50 text-brand-600">
+          <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-xl bg-brand-600/10 text-brand-600 dark:text-brand-400">
             <Building2 className="h-4 w-4" aria-hidden="true" />
           </span>
           <div className="min-w-0">
-            <div className="font-medium text-slate-900">{row.name}</div>
-            <div className="line-clamp-2 text-xs text-slate-500">
+            <div className="font-medium text-fg">{row.name}</div>
+            <div className="line-clamp-2 text-xs text-fg-3">
               {row.description || "—"}
             </div>
           </div>
@@ -90,13 +90,7 @@ export function DepartmentsPage(): JSX.Element {
       align: "center",
       hideBelow: "md",
       cell: (row) => (
-        <span
-          className={
-            row.isActive
-              ? "inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700"
-              : "inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600"
-          }
-        >
+        <span className={`badge ${row.isActive ? "badge-green" : "badge-muted"}`}>
           {row.isActive ? "Faol" : "Arxivda"}
         </span>
       ),
@@ -108,7 +102,7 @@ export function DepartmentsPage(): JSX.Element {
       sortField: "created_at",
       hideBelow: "lg",
       cell: (row) => (
-        <span className="text-xs text-slate-500">{formatDateTime(row.createdAt)}</span>
+        <span className="text-xs text-fg-3">{formatDateTime(row.createdAt)}</span>
       ),
     },
   ];
@@ -155,7 +149,7 @@ export function DepartmentsPage(): JSX.Element {
           />
         </div>
         {query.data ? (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-fg-3">
             Jami: {query.data.count.toLocaleString("uz-UZ")}
           </span>
         ) : null}
@@ -201,7 +195,7 @@ export function DepartmentsPage(): JSX.Element {
               size="icon"
               onClick={() => setPendingDelete(row)}
               aria-label={`${row.name} bo'limini o'chirish`}
-              className="text-red-600 hover:bg-red-50 hover:text-red-700"
+              className="text-danger hover:bg-danger-bg hover:text-danger"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
             </Button>
@@ -351,7 +345,7 @@ function DepartmentFormModal({
             autoFocus
           />
           {form.formState.errors.name ? (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="field-error" role="alert">
               {form.formState.errors.name.message}
             </p>
           ) : null}
@@ -362,10 +356,10 @@ function DepartmentFormModal({
             id="department-description"
             rows={3}
             {...form.register("description")}
-            className="block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+            className="textarea-field"
           />
           {form.formState.errors.description ? (
-            <p className="mt-1 text-xs text-red-600" role="alert">
+            <p className="field-error" role="alert">
               {form.formState.errors.description.message}
             </p>
           ) : null}

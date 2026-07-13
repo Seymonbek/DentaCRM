@@ -24,13 +24,28 @@ header (e.g. Django's ``SecurityMiddleware`` set ``Referrer-Policy``
 first). Django's ``SECURE_CONTENT_TYPE_NOSNIFF`` handles
 ``X-Content-Type-Options`` when set to True; if operators enable it
 this middleware will not overwrite it.
+
+T131 — :class:`RequestIdMiddleware` reads ``X-Request-ID`` from the
+inbound request (or generates a UUIDv4), publishes it via the
+contextvars in :mod:`apps.core.logging`, and echoes it back on the
+response so downstream services (nginx access logs, browser dev tools,
+Sentry) share the same trace id. It also binds the current
+authenticated user id so log records can be filtered per user.
 """
 from __future__ import annotations
 
+import uuid
 from typing import Callable
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
+
+from .logging import (
+    bind_request_context,
+    clear_request_context,
+    request_id_var,
+    user_id_var,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -106,4 +121,77 @@ class SecurityHeadersMiddleware:
         return response
 
 
-__all__ = ["SecurityHeadersMiddleware"]
+__all__ = ["SecurityHeadersMiddleware", "RequestIdMiddleware"]
+
+
+# ---------------------------------------------------------------------------
+# T131 — request-id correlation
+# ---------------------------------------------------------------------------
+REQUEST_ID_HEADER = "X-Request-ID"
+_META_KEY = "HTTP_X_REQUEST_ID"
+
+
+def _incoming_request_id(request: HttpRequest) -> str:
+    """Return the inbound request-id, sanitised.
+
+    Trust an inbound header only when it looks reasonable (printable,
+    ≤ 128 chars). Otherwise generate a fresh UUIDv4 so a malicious
+    client can't inject newlines / control characters into our logs.
+    """
+    raw = request.META.get(_META_KEY, "")
+    if not raw:
+        return uuid.uuid4().hex
+    raw = raw.strip()
+    if not raw or len(raw) > 128:
+        return uuid.uuid4().hex
+    # Only keep the ASCII subset humans use for trace ids.
+    for ch in raw:
+        if not (ch.isalnum() or ch in "-_"):
+            return uuid.uuid4().hex
+    return raw
+
+
+class RequestIdMiddleware:
+    """Attach ``X-Request-ID`` to every request/response + log record.
+
+    * Reads ``X-Request-ID`` from the request (or mints a fresh
+      UUIDv4 when absent / invalid).
+    * Stores the value on ``request.request_id`` so views / signal
+      handlers can read it without touching contextvars.
+    * Publishes it via :data:`apps.core.logging.request_id_var` so the
+      JSON formatter (and any custom filter) emits it on every log
+      record produced during the request.
+    * Publishes the authenticated user id via
+      :data:`apps.core.logging.user_id_var` so log slicing per user
+      works out of the box.
+    * Echoes the id back in the response header so clients (and any
+      L7 proxy access log) share the same trace token.
+    """
+
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
+        self.get_response = get_response
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        request_id = _incoming_request_id(request)
+        request.request_id = request_id  # type: ignore[attr-defined]
+
+        # User id is best-effort: middleware runs before DRF's auth
+        # for API requests, so we defer resolution to the response
+        # phase via ``request.user`` (which the auth middleware may
+        # have populated by then).
+        bind_request_context(request_id=request_id, user_id=None)
+        try:
+            response = self.get_response(request)
+            user = getattr(request, "user", None)
+            if user is not None and getattr(user, "is_authenticated", False):
+                bind_request_context(
+                    request_id=request_id,
+                    user_id=str(getattr(user, "pk", "")) or None,
+                )
+            if REQUEST_ID_HEADER not in response:
+                response[REQUEST_ID_HEADER] = request_id
+            return response
+        finally:
+            clear_request_context()

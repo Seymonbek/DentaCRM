@@ -1,29 +1,42 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   invalid?: boolean;
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, invalid, type = "text", ...props }, ref) => {
-    return (
-      <input
-        ref={ref}
-        type={type}
-        className={cn(
-          "block w-full rounded-md border bg-white px-3 py-2 text-sm shadow-sm",
-          "placeholder:text-slate-400 focus:outline-none focus:ring-2",
-          "disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500",
-          invalid
-            ? "border-red-400 focus:border-red-500 focus:ring-red-500/40"
-            : "border-slate-300 focus:border-brand-500 focus:ring-brand-500/40",
-          className,
-        )}
-        aria-invalid={invalid || undefined}
-        {...props}
-      />
-    );
-  },
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, invalid, type, ...props }, ref) => (
+    <input
+      ref={ref}
+      type={type ?? "text"}
+      className={cn(
+        // Base — iOS rounded input style
+        "flex h-9 w-full rounded-[12px] px-3.5 py-2 text-sm",
+        "border bg-surface text-fg",
+        "placeholder:text-fg-3",
+        "outline-none",
+        // Subtle inner shadow (Apple control style)
+        "shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]",
+        "dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.25)]",
+        // Transitions
+        "transition-all duration-150",
+        // Normal border
+        "border-border hover:border-fg-3/50",
+        // Focus — brand ring (like iOS blue)
+        "focus:border-brand-500 focus:ring-2 focus:ring-brand-500/15",
+        // Invalid
+        invalid && "border-danger focus:border-danger focus:ring-danger/15",
+        // Disabled
+        "disabled:cursor-not-allowed disabled:opacity-45",
+        // File input
+        "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+        className,
+      )}
+      aria-invalid={invalid || undefined}
+      {...props}
+    />
+  ),
 );
+
 Input.displayName = "Input";

@@ -12,12 +12,25 @@ Rules enforced here (per PROJECT_BRIEF § "treatments app"):
   ``default_price`` when omitted.
 * Stage transitions: ``in_progress`` → ``completed`` only. Moving back
   is not supported to keep the audit trail meaningful.
+
+Photo upload validation (T130):
+
+* MIME type must be one of ``image/jpeg``, ``image/png``, ``image/webp``
+  — SVG is explicitly rejected because it can carry inline JavaScript.
+* File extension must match the allow-list.
+* File size must be ≤ ``settings.MAX_PHOTO_MB`` MiB.
+* The bytes must open successfully via ``Pillow.Image.verify()`` so
+  files with faked headers (extension says .png, bytes are anything
+  else) are rejected before they hit storage.
 """
 from __future__ import annotations
 
+import os
 from decimal import Decimal, InvalidOperation
+from io import BytesIO
 from typing import Any
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -33,8 +46,150 @@ User = get_user_model()
 
 
 # ---------------------------------------------------------------------------
-# Field cleaners
+# Photo upload constants (T130)
 # ---------------------------------------------------------------------------
+ALLOWED_PHOTO_MIME_TYPES = frozenset({
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+})
+
+ALLOWED_PHOTO_EXTENSIONS = frozenset({
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".webp",
+})
+
+# Explicitly denied — SVG can carry inline <script>, HEIC/HEIF confuses
+# some downstream image processors, GIF is disallowed by product spec.
+DENIED_PHOTO_MIME_TYPES = frozenset({
+    "image/svg+xml",
+    "image/gif",
+    "image/heic",
+    "image/heif",
+    "application/pdf",
+    "text/html",
+})
+
+
+# ---------------------------------------------------------------------------
+# Photo upload validation (T130)
+# ---------------------------------------------------------------------------
+def _validate_photo_upload(image: Any) -> None:
+    """Enforce MIME / extension / size / Pillow-verify on an uploaded photo.
+
+    Raises :class:`django.core.exceptions.ValidationError` on any
+    failure so callers surface a clean 400 via DRF's exception handler.
+
+    Rejected uploads:
+
+    * Size > ``settings.MAX_PHOTO_MB`` MiB (default 8 MiB).
+    * MIME type not in :data:`ALLOWED_PHOTO_MIME_TYPES`.
+    * Extension not in :data:`ALLOWED_PHOTO_EXTENSIONS`.
+    * MIME type in :data:`DENIED_PHOTO_MIME_TYPES` (e.g. SVG, PDF).
+    * Bytes fail ``Pillow.Image.verify()`` — catches fake-header
+      uploads (extension says .png, bytes are anything else).
+    """
+    # Local Pillow import so the app boots without Pillow installed
+    # in exotic contexts (e.g. plain manage.py check on a fresh clone).
+    try:
+        from PIL import Image, UnidentifiedImageError
+    except ImportError as exc:  # pragma: no cover - installed by base.txt
+        raise ValidationError(
+            {"image": ["Rasm ishlov beruvchi kutubxona (Pillow) o'rnatilmagan."]}
+        ) from exc
+
+    # ---- size --------------------------------------------------------
+    max_mb = int(getattr(settings, "MAX_PHOTO_MB", 8))
+    max_bytes = max_mb * 1024 * 1024
+    size = getattr(image, "size", None)
+    if size is not None and size > max_bytes:
+        raise ValidationError(
+            {"image": [
+                f"Rasm hajmi {max_mb} MB dan oshmasligi kerak "
+                f"(joriy: {size / (1024 * 1024):.1f} MB)."
+            ]}
+        )
+
+    # ---- MIME --------------------------------------------------------
+    content_type = (
+        getattr(image, "content_type", "") or ""
+    ).strip().lower()
+    # Strip parameters like ``image/jpeg; charset=binary`` that some
+    # multipart parsers append.
+    if ";" in content_type:
+        content_type = content_type.split(";", 1)[0].strip()
+
+    if content_type in DENIED_PHOTO_MIME_TYPES:
+        raise ValidationError(
+            {"image": [
+                f"Bu turdagi fayl ruxsat etilmagan ({content_type})."
+            ]}
+        )
+
+    if content_type and content_type not in ALLOWED_PHOTO_MIME_TYPES:
+        raise ValidationError(
+            {"image": [
+                "Faqat JPEG, PNG yoki WEBP formatli rasm yuklash mumkin "
+                f"(qabul qilindi: {content_type!r})."
+            ]}
+        )
+
+    # ---- extension ---------------------------------------------------
+    filename = getattr(image, "name", "") or ""
+    _, ext = os.path.splitext(filename)
+    ext = ext.lower()
+    if ext and ext not in ALLOWED_PHOTO_EXTENSIONS:
+        raise ValidationError(
+            {"image": [
+                "Fayl kengaytmasi noto'g'ri "
+                f"(qabul qilindi: {ext!r}). Ruxsat berilgan: "
+                f"{', '.join(sorted(ALLOWED_PHOTO_EXTENSIONS))}."
+            ]}
+        )
+
+    # ---- Pillow verify ----------------------------------------------
+    # verify() consumes the file pointer, so we snapshot the bytes,
+    # verify from a copy, then rewind the original for downstream
+    # ImageField save.
+    read_method = getattr(image, "read", None)
+    seek_method = getattr(image, "seek", None)
+    if read_method is None:
+        return  # non-file-like objects (unusual) skip verify().
+
+    if seek_method is not None:
+        try:
+            seek_method(0)
+        except (OSError, ValueError):
+            pass
+
+    try:
+        raw = read_method()
+    except (OSError, ValueError) as exc:
+        raise ValidationError(
+            {"image": ["Rasm faylini o'qib bo'lmadi."]}
+        ) from exc
+
+    try:
+        with Image.open(BytesIO(raw)) as im:
+            im.verify()
+    except (UnidentifiedImageError, OSError, ValueError, SyntaxError) as exc:
+        raise ValidationError(
+            {"image": [
+                "Fayl haqiqiy rasm emas yoki zararlangan."
+            ]}
+        ) from exc
+    finally:
+        # Rewind so the ImageField can persist the bytes.
+        if seek_method is not None:
+            try:
+                seek_method(0)
+            except (OSError, ValueError):
+                pass
+
+
+
 def _clean_text(value: Any, *, max_length: int, field: str) -> str:
     if value is None:
         return ""
@@ -331,9 +486,16 @@ def upload_treatment_photo(
     caption: str = "",
     uploaded_by: Any = None,
 ) -> TreatmentPhoto:
-    """Attach a before/after/x-ray photo to ``treatment``."""
+    """Attach a before/after/x-ray photo to ``treatment``.
+
+    T130 — validates the incoming file for MIME type, extension, size,
+    and Pillow-openable bytes before it hits storage. See
+    :func:`_validate_photo_upload`.
+    """
     if image in (None, ""):
         raise ValidationError({"image": ["Rasm fayli majburiy."]})
+
+    _validate_photo_upload(image)
 
     photo = TreatmentPhoto.objects.create(
         treatment=treatment,
@@ -362,4 +524,7 @@ __all__ = [
     "soft_delete_treatment",
     "upload_treatment_photo",
     "soft_delete_photo",
+    "ALLOWED_PHOTO_MIME_TYPES",
+    "ALLOWED_PHOTO_EXTENSIONS",
+    "DENIED_PHOTO_MIME_TYPES",
 ]

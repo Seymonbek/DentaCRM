@@ -171,7 +171,7 @@ function DoctorCommissionRow({
   const q = useDoctorCommissionsSummary(doctor.id, { from, to });
   const summary: CommissionSummary | undefined = q.data;
   return (
-    <tr className="border-b border-slate-100 last:border-none">
+    <tr className="border-b border-border last:border-none">
       <td className="px-4 py-3">
         <Link
           to={`/doctors/${doctor.id}`}
@@ -183,7 +183,7 @@ function DoctorCommissionRow({
           {doctor.specialization || "—"}
         </p>
       </td>
-      <td className="px-4 py-3 text-right text-sm text-slate-700 dark:text-slate-200">
+      <td className="px-4 py-3 text-right text-sm text-fg-2">
         {q.isLoading ? <Skeleton className="ml-auto h-4 w-14" /> : summary?.count ?? 0}
       </td>
       <td className="px-4 py-3 text-right text-sm">
@@ -230,7 +230,7 @@ export function FinancePage(): JSX.Element {
       key: "createdAt",
       header: "Sana",
       cell: (row) => (
-        <span className="whitespace-nowrap text-sm text-slate-700 dark:text-slate-200">
+        <span className="whitespace-nowrap text-sm text-fg-2">
           {safeDate(row.createdAt)}
         </span>
       ),
@@ -254,10 +254,10 @@ export function FinancePage(): JSX.Element {
           className={cn(
             "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
             row.method === "cash"
-              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-200"
+              ? "bg-success/10 text-success"
               : row.method === "card"
-                ? "bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200"
-                : "bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200",
+                ? "bg-brand-600/10 text-brand-600 dark:text-brand-300"
+                : "bg-surface-2 text-fg-2",
           )}
         >
           {PAYMENT_METHOD_LABELS[row.method]}
@@ -270,7 +270,7 @@ export function FinancePage(): JSX.Element {
       hideBelow: "md",
       cell: (row) =>
         row.receivedBy ? (
-          <span className="text-sm text-slate-700 dark:text-slate-200">
+          <span className="text-sm text-fg-2">
             {row.receivedBy.firstName} {row.receivedBy.lastName}
           </span>
         ) : (
@@ -283,7 +283,7 @@ export function FinancePage(): JSX.Element {
       hideBelow: "lg",
       cell: (row) =>
         row.note ? (
-          <span className="line-clamp-1 text-sm text-slate-600 dark:text-slate-300">
+          <span className="line-clamp-1 text-sm text-fg-2">
             {row.note}
           </span>
         ) : (
@@ -353,7 +353,7 @@ export function FinancePage(): JSX.Element {
         className="card p-0"
         aria-labelledby="finance-payments-heading"
       >
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-5 sm:flex-row sm:items-end sm:justify-between dark:border-slate-700">
+        <div className="flex flex-col gap-3 border-b border-border p-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2
               id="finance-payments-heading"
@@ -380,7 +380,7 @@ export function FinancePage(): JSX.Element {
                 setMethod(event.target.value as PaymentMethod | "");
                 setPage(1);
               }}
-              className="block rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs shadow-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+              className="select-field text-xs py-1.5 px-2.5"
             >
               <option value="">Barchasi</option>
               {PAYMENT_METHOD_OPTIONS.map((opt) => (
@@ -457,9 +457,9 @@ export function FinancePage(): JSX.Element {
             icon={<AlertTriangle className="h-10 w-10" aria-hidden="true" />}
           />
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+          <div className="overflow-x-auto rounded-xl border border-border">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-muted-foreground dark:bg-slate-800">
+              <thead className="bg-surface-2 text-xs uppercase tracking-wide text-fg-3">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Shifokor</th>
                   <th className="px-4 py-3 text-right font-semibold">
@@ -470,7 +470,7 @@ export function FinancePage(): JSX.Element {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-slate-900">
+              <tbody className="divide-y divide-border">
                 {doctors.map((doctor) => (
                   <DoctorCommissionRow
                     key={doctor.id}

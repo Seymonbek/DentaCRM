@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from django.contrib import admin
-from simple_history.admin import SimpleHistoryAdmin
+from unfold.admin import ModelAdmin
 
 from .models import Appointment
 
 
 @admin.register(Appointment)
-class AppointmentAdmin(SimpleHistoryAdmin):
+class AppointmentAdmin(ModelAdmin):
     list_display = (
         "scheduled_start",
         "scheduled_end",
@@ -37,3 +37,4 @@ class AppointmentAdmin(SimpleHistoryAdmin):
     date_hierarchy = "scheduled_start"
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-scheduled_start",)
+

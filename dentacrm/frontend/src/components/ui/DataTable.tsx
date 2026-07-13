@@ -1,29 +1,17 @@
 import type { ReactNode } from "react";
-
+import { ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EmptyState } from "./EmptyState";
-import { Skeleton } from "./Skeleton";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 export interface DataTableColumn<T> {
-  /** Stable key — used as React key + sort field. */
   key: string;
-  /** Column header label. */
-  header: ReactNode;
-  /** Custom cell renderer. Falls back to ``row[key]`` when omitted. */
-  cell?: (row: T, index: number) => ReactNode;
-  /** Optional column width override (Tailwind class or CSS length). */
-  width?: string;
-  /** Right-align numeric columns. */
-  align?: "left" | "right" | "center";
-  /** Enable header click to sort by ``sortField ?? key``. */
+  header: string;
+  cell?: (row: T) => ReactNode;
   sortable?: boolean;
-  /** Explicit ordering field name sent to the backend. */
   sortField?: string;
-  /** Hide on mobile-first screens (Tailwind ``hidden md:table-cell``). */
+  align?: "left" | "center" | "right";
   hideBelow?: "sm" | "md" | "lg";
+  width?: string;
 }
 
 export interface DataTableSort {
@@ -31,248 +19,203 @@ export interface DataTableSort {
   direction: "asc" | "desc";
 }
 
-export interface DataTableProps<T> {
+interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   rows: T[] | undefined;
-  rowKey: (row: T, index: number) => string;
+  rowKey: (row: T) => string | number;
   isLoading?: boolean;
-  error?: unknown;
+  skeletonRows?: number;
+  error?: Error | unknown;
   emptyTitle?: string;
   emptyDescription?: string;
   emptyAction?: ReactNode;
   onRowClick?: (row: T) => void;
+  /** Optional per-row action cell rendered as the last column */
+  rowActions?: (row: T) => ReactNode;
   sort?: DataTableSort | null;
   onSortChange?: (sort: DataTableSort | null) => void;
-  /** Optional right-side action column renderer. */
-  rowActions?: (row: T) => ReactNode;
   className?: string;
-  /** Rows rendered by the skeleton placeholder. */
-  skeletonRows?: number;
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-function alignClass(align: DataTableColumn<unknown>["align"]): string {
-  switch (align) {
-    case "right":
-      return "text-right";
-    case "center":
-      return "text-center";
-    default:
-      return "text-left";
-  }
-}
+const HIDE: Record<string, string> = {
+  sm: "hidden sm:table-cell",
+  md: "hidden md:table-cell",
+  lg: "hidden lg:table-cell",
+};
 
-function hideClass(hide: DataTableColumn<unknown>["hideBelow"]): string {
-  switch (hide) {
-    case "sm":
-      return "hidden sm:table-cell";
-    case "md":
-      return "hidden md:table-cell";
-    case "lg":
-      return "hidden lg:table-cell";
-    default:
-      return "";
-  }
-}
+const ALIGN: Record<string, string> = {
+  left:   "text-left",
+  center: "text-center",
+  right:  "text-right",
+};
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
 export function DataTable<T>({
   columns,
   rows,
   rowKey,
   isLoading,
+  skeletonRows = 5,
   error,
   emptyTitle = "Ma'lumot topilmadi",
   emptyDescription,
   emptyAction,
   onRowClick,
+  rowActions,
   sort,
   onSortChange,
-  rowActions,
   className,
-  skeletonRows = 5,
 }: DataTableProps<T>): JSX.Element {
-  const handleHeaderClick = (col: DataTableColumn<T>): void => {
+
+  const allColumns = rowActions
+    ? [...columns, { key: "__actions", header: "", align: "right" as const }]
+    : columns;
+
+  function handleSort(col: DataTableColumn<T>) {
     if (!col.sortable || !onSortChange) return;
     const field = col.sortField ?? col.key;
-    if (!sort || sort.field !== field) {
+    if (sort?.field === field) {
+      if (sort.direction === "asc") onSortChange({ field, direction: "desc" });
+      else onSortChange(null);
+    } else {
       onSortChange({ field, direction: "asc" });
-      return;
     }
-    onSortChange(
-      sort.direction === "asc"
-        ? { field, direction: "desc" }
-        : null,
-    );
-  };
-
-  const showEmpty = !isLoading && !error && Array.isArray(rows) && rows.length === 0;
-  const showRows = !isLoading && !error && Array.isArray(rows) && rows.length > 0;
+  }
 
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm",
-        className,
-      )}
+    <div className={cn("w-full overflow-hidden rounded-2xl border border-border bg-surface", className)}
+      style={{ boxShadow: "var(--shadow-sm)" }}
     >
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              {columns.map((col) => {
-                const field = col.sortField ?? col.key;
-                const isSorted = sort?.field === field;
-                return (
-                  <th
-                    key={col.key}
-                    scope="col"
-                    className={cn(
-                      "border-b border-slate-200 px-4 py-3 font-semibold",
-                      alignClass(col.align),
-                      hideClass(col.hideBelow),
-                      col.sortable ? "cursor-pointer select-none" : "",
-                    )}
-                    style={col.width ? { width: col.width } : undefined}
-                    onClick={() => handleHeaderClick(col)}
-                    aria-sort={
-                      isSorted
-                        ? sort?.direction === "asc"
-                          ? "ascending"
-                          : "descending"
-                        : "none"
-                    }
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      {col.header}
-                      {col.sortable ? (
-                        <SortIndicator
-                          active={isSorted}
-                          direction={isSorted ? sort?.direction : undefined}
-                        />
-                      ) : null}
-                    </span>
-                  </th>
-                );
-              })}
-              {rowActions ? (
+        <table className="w-full text-sm text-left">
+          {/* Head */}
+          <thead>
+            <tr className="border-b border-border" style={{ background: "hsl(var(--color-surface-2) / 0.6)" }}>
+              {allColumns.map((col) => (
                 <th
-                  scope="col"
-                  className="border-b border-slate-200 px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500"
-                  aria-label="Amallar"
+                  key={col.key}
+                  className={cn(
+                    "px-5 py-3.5 text-[10px] font-bold uppercase tracking-[0.10em] text-fg-3 whitespace-nowrap",
+                    ALIGN[col.align ?? "left"],
+                    col.hideBelow ? HIDE[col.hideBelow] : "",
+                    col.key !== "__actions" && col.sortable
+                      ? "cursor-pointer select-none hover:text-fg transition-colors duration-150"
+                      : "",
+                    col.width ?? "",
+                  )}
+                  onClick={() => col.key !== "__actions" && handleSort(col)}
+                  aria-sort={
+                    col.key !== "__actions" && sort?.field === (col.sortField ?? col.key)
+                      ? sort.direction === "asc" ? "ascending" : "descending"
+                      : col.sortable ? "none" : undefined
+                  }
                 >
-                  Amallar
+                  <span className="inline-flex items-center gap-1.5">
+                    {col.header}
+                    {col.key !== "__actions" && col.sortable && (
+                      <SortIcon
+                        active={sort?.field === (col.sortField ?? col.key)}
+                        direction={sort?.field === (col.sortField ?? col.key) ? sort.direction : null}
+                      />
+                    )}
+                  </span>
                 </th>
-              ) : null}
+              ))}
             </tr>
           </thead>
+
+          {/* Body */}
           <tbody>
-            {isLoading
-              ? Array.from({ length: skeletonRows }).map((_, i) => (
-                  <tr key={`sk-${i}`} className="border-b border-slate-100">
-                    {columns.map((col) => (
-                      <td key={col.key} className={cn("px-4 py-3", hideClass(col.hideBelow))}>
-                        <Skeleton className="h-4 w-full max-w-[10rem]" />
-                      </td>
-                    ))}
-                    {rowActions ? (
-                      <td className="px-4 py-3">
-                        <Skeleton className="ml-auto h-4 w-16" />
-                      </td>
-                    ) : null}
-                  </tr>
-                ))
-              : null}
-
-            {showRows
-              ? rows!.map((row, index) => {
-                  const key = rowKey(row, index);
-                  const clickable = Boolean(onRowClick);
-                  return (
-                    <tr
-                      key={key}
-                      className={cn(
-                        "border-b border-slate-100 transition-colors",
-                        index % 2 === 1 ? "bg-slate-50/40" : "bg-white",
-                        clickable ? "cursor-pointer hover:bg-brand-50/60" : "hover:bg-slate-50",
-                      )}
-                      onClick={clickable ? () => onRowClick!(row) : undefined}
+            {isLoading ? (
+              Array.from({ length: skeletonRows }).map((_, i) => (
+                <tr key={i} className="border-b border-border-2 last:border-none">
+                  {allColumns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={cn("px-5 py-3.5", col.hideBelow ? HIDE[col.hideBelow] : "")}
                     >
-                      {columns.map((col) => (
-                        <td
-                          key={col.key}
-                          className={cn(
-                            "px-4 py-3 text-slate-800",
-                            alignClass(col.align),
-                            hideClass(col.hideBelow),
-                          )}
-                        >
-                          {col.cell
-                            ? col.cell(row, index)
-                            : String((row as Record<string, unknown>)[col.key] ?? "—")}
-                        </td>
-                      ))}
-                      {rowActions ? (
-                        <td
-                          className="px-4 py-3 text-right"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {rowActions(row)}
-                        </td>
-                      ) : null}
-                    </tr>
-                  );
-                })
-              : null}
-
-            {error && !isLoading ? (
+                      <div className="skeleton h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : error ? (
               <tr>
-                <td
-                  colSpan={columns.length + (rowActions ? 1 : 0)}
-                  className="px-4 py-8 text-center text-sm text-red-600"
-                >
-                  Ma'lumotlarni yuklashda xatolik yuz berdi.
+                <td colSpan={allColumns.length} className="px-5 py-12 text-center">
+                  <div className="inline-flex flex-col items-center gap-3 text-danger">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-danger-bg">
+                      <AlertTriangle className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">Ma'lumot yuklanmadi</p>
+                      <p className="text-xs text-fg-3 mt-0.5">
+                        {error instanceof Error ? error.message : "Kutilmagan xatolik"}
+                      </p>
+                    </div>
+                  </div>
                 </td>
               </tr>
-            ) : null}
+            ) : !rows || rows.length === 0 ? (
+              <tr>
+                <td colSpan={allColumns.length}>
+                  <EmptyState
+                    title={emptyTitle}
+                    description={emptyDescription}
+                    action={emptyAction}
+                  />
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => (
+                <tr
+                  key={rowKey(row)}
+                  onClick={onRowClick ? () => onRowClick(row) : undefined}
+                  className={cn(
+                    "border-b border-border-2 last:border-none",
+                    "transition-all duration-150",
+                    onRowClick
+                      ? "cursor-pointer hover:bg-surface-2/60 hover:shadow-[inset_3px_0_0_hsl(var(--color-primary)/0.5)]"
+                      : "",
+                  )}
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={cn(
+                        "px-5 py-3.5 text-fg-2",
+                        ALIGN[col.align ?? "left"],
+                        col.hideBelow ? HIDE[col.hideBelow] : "",
+                      )}
+                    >
+                      {col.cell ? col.cell(row) : null}
+                    </td>
+                  ))}
+                  {rowActions ? (
+                    <td
+                      className="px-5 py-3.5 text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {rowActions(row)}
+                    </td>
+                  ) : null}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-
-      {showEmpty ? (
-        <div className="border-t border-slate-100 bg-white p-6">
-          <EmptyState
-            title={emptyTitle}
-            description={emptyDescription}
-            action={emptyAction}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }
 
-function SortIndicator({
+function SortIcon({
   active,
   direction,
 }: {
   active: boolean;
-  direction?: "asc" | "desc";
+  direction: "asc" | "desc" | null;
 }): JSX.Element {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "flex flex-col text-[0.55rem] leading-none text-slate-400",
-        active ? "text-brand-600" : "",
-      )}
-    >
-      <span className={cn(direction === "asc" && active ? "text-brand-600" : "")}>▲</span>
-      <span className={cn(direction === "desc" && active ? "text-brand-600" : "")}>▼</span>
-    </span>
-  );
+  if (!active) return <ChevronsUpDown className="h-3 w-3 opacity-35" />;
+  return direction === "asc"
+    ? <ChevronUp className="h-3 w-3 text-brand-500" />
+    : <ChevronDown className="h-3 w-3 text-brand-500" />;
 }
