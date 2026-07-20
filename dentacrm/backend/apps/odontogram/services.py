@@ -204,8 +204,44 @@ def soft_delete_tooth_record(record: ToothRecord) -> ToothRecord:
     return record
 
 
+@transaction.atomic
+def clone_last_odontogram_state(target_treatment: Treatment) -> list[ToothRecord]:
+    """Clone the latest tooth record state for each tooth of the patient into the target treatment.
+
+    Excludes the target treatment itself from the source records to avoid self-cloning.
+    """
+    from .selectors import latest_records_by_tooth
+
+    patient_id = target_treatment.patient_id
+    latest_records = latest_records_by_tooth(patient_id)
+
+    cloned: list[ToothRecord] = []
+    for tooth_number, src_record in latest_records.items():
+        # Do not clone if it belongs to the target treatment itself (already exists)
+        if src_record.treatment_id == target_treatment.id:
+            continue
+
+        # Skip if a record for this tooth already exists on the target treatment
+        if ToothRecord.objects.filter(
+            treatment=target_treatment, tooth_number=tooth_number, is_active=True
+        ).exists():
+            continue
+
+        rec = ToothRecord.objects.create(
+            treatment=target_treatment,
+            tooth_number=tooth_number,
+            procedure=src_record.procedure,
+            status=src_record.status,
+            notes=src_record.notes or "",
+            is_active=True,
+        )
+        cloned.append(rec)
+    return cloned
+
+
 __all__ = [
     "create_tooth_record",
     "update_tooth_record",
     "soft_delete_tooth_record",
+    "clone_last_odontogram_state",
 ]

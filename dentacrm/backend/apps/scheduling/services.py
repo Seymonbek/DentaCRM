@@ -25,7 +25,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from apps.departments.models import Department
-from apps.doctors.models import DoctorProfile, ProcedureType, TimeOff
+from apps.doctors.models import DoctorProfile, ProcedureType, TimeOff, WorkingHours
 from apps.patients.models import Patient
 
 from .models import BLOCKING_STATUSES, Appointment, AppointmentStatus
@@ -133,6 +133,34 @@ def _check_doctor_available(
         )
 
 
+def _check_doctor_working_hours(
+    doctor: DoctorProfile, start: datetime, end: datetime
+) -> None:
+    """Reject if the appointment start and end times do not fall within the doctor's WorkingHours."""
+    start_local = timezone.localtime(start)
+    end_local = timezone.localtime(end)
+
+    if start_local.date() != end_local.date():
+        raise ValidationError(
+            {"scheduled_start": ["Navbat bir kundan oshmasligi yoki kundan-kunga o'tmasligi kerak."]}
+        )
+
+    weekday = start_local.weekday()
+    time_start = start_local.time()
+    time_end = end_local.time()
+
+    shifts = WorkingHours.objects.filter(
+        doctor=doctor,
+        weekday=weekday,
+        start_time__lte=time_start,
+        end_time__gte=time_end,
+    )
+    if not shifts.exists():
+        raise ValidationError(
+            {"scheduled_start": ["Tanlangan vaqt shifokorning ish soatlariga to'g'ri kelmaydi."]}
+        )
+
+
 def _check_patient_double_booking(
     patient: Patient,
     start: datetime,
@@ -204,6 +232,7 @@ def create_appointment(
     # here anyway, but the check keeps the invariant explicit.
     status = _validate_status(status)
     if status in BLOCKING_STATUSES:
+        _check_doctor_working_hours(doctor_obj, start, end)
         if has_overlap(
             doctor=doctor_obj,
             scheduled_start=start,
@@ -328,6 +357,7 @@ def update_appointment(
         # blocks a slot.
         if (status or appointment.status) in BLOCKING_STATUSES:
             _check_doctor_available(appointment.doctor, new_start, new_end)
+            _check_doctor_working_hours(appointment.doctor, new_start, new_end)
             if has_overlap(
                 doctor=appointment.doctor,
                 scheduled_start=new_start,

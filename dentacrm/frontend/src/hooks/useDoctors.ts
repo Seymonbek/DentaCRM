@@ -82,11 +82,13 @@ import {
   getAvailableSlots,
   listTimeOff,
   listWorkingHours,
+  listProcedureTypes,
   type AvailableSlotsResponse,
   type DoctorTimeOff,
   type DoctorWorkingHour,
   type TimeOffInput,
   type WorkingHourInput,
+  type ProcedureType,
 } from "@/api/doctors";
 
 export const doctorScheduleKeys = {
@@ -179,3 +181,11 @@ export function useAvailableSlots(
     enabled: Boolean(doctorId && date),
   });
 }
+
+export function useProcedureTypes() {
+  return useQuery<ProcedureType[]>({
+    queryKey: ["procedure-types"],
+    queryFn: () => listProcedureTypes(),
+  });
+}
+

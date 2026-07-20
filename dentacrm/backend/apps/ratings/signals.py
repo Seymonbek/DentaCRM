@@ -80,6 +80,34 @@ def _on_treatment_saved(sender, instance: Treatment, created: bool, **kwargs):
             instance.pk,
         )
 
+    # Award NEW_PATIENT points if this is the patient's first completed treatment
+    patient = getattr(instance, "patient", None)
+    if patient:
+        first_completed = not Treatment.objects.filter(
+            patient=patient,
+            stage=TreatmentStage.COMPLETED,
+        ).exclude(pk=instance.pk).exists()
+
+        if first_completed:
+            already_new_patient = ScoreLog.objects.filter(
+                related_patient=patient,
+                reason=ScoreReason.NEW_PATIENT,
+                is_active=True,
+            ).exists()
+            if not already_new_patient:
+                try:
+                    award_points(
+                        doctor=doctor,
+                        reason=ScoreReason.NEW_PATIENT,
+                        related_patient=patient,
+                        related_treatment=instance,
+                    )
+                except Exception:  # noqa: BLE001
+                    logger.exception(
+                        "ratings: failed to award NEW_PATIENT for treatment=%s",
+                        instance.pk,
+                    )
+
 
 @receiver(post_save, sender=TreatmentPhoto, dispatch_uid="ratings.photo_uploaded")
 def _on_photo_uploaded(sender, instance: TreatmentPhoto, created: bool, **kwargs):

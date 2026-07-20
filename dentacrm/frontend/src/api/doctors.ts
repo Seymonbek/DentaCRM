@@ -242,6 +242,26 @@ export function getAvailableSlots(
   });
 }
 
+export interface ProcedureType {
+  id: string;
+  name: string;
+  department: {
+    id: string;
+    name: string | null;
+  };
+  defaultDurationMinutes: number;
+  defaultPrice: string;
+  commissionRateOverride: string | null;
+  isActive: boolean;
+}
+
+export function listProcedureTypes(): Promise<ProcedureType[]> {
+  return request<ProcedureType[]>({
+    method: "GET",
+    url: "/procedure-types/",
+  });
+}
+
 /** Localised weekday labels (Mon–Sun order, index 0 = Monday). */
 export const WEEKDAY_LABELS: readonly string[] = [
   "Dushanba",
@@ -252,3 +272,4 @@ export const WEEKDAY_LABELS: readonly string[] = [
   "Shanba",
   "Yakshanba",
 ];
+

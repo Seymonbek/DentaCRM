@@ -7,6 +7,25 @@ from unfold.admin import ModelAdmin
 from .models import Appointment
 
 
+def is_doctor_restricted(user):
+    if user.is_superuser:
+        return False
+    if getattr(user, "role", None) != "doctor":
+        return False
+    try:
+        profile = user.doctor_profile
+        return not profile.can_view_other_doctors
+    except Exception:
+        return True
+
+
+def get_doctor_profile(user):
+    try:
+        return user.doctor_profile
+    except Exception:
+        return None
+
+
 @admin.register(Appointment)
 class AppointmentAdmin(ModelAdmin):
     list_display = (
@@ -37,4 +56,25 @@ class AppointmentAdmin(ModelAdmin):
     date_hierarchy = "scheduled_start"
     readonly_fields = ("created_at", "updated_at")
     ordering = ("-scheduled_start",)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if is_doctor_restricted(request.user):
+            profile = get_doctor_profile(request.user)
+            if profile:
+                return qs.filter(doctor=profile)
+        return qs
+
+    def save_model(self, request, obj, form, change):
+        if is_doctor_restricted(request.user):
+            profile = get_doctor_profile(request.user)
+            if profile:
+                obj.doctor = profile
+        super().save_model(request, obj, form, change)
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly = list(super().get_readonly_fields(request, obj))
+        if is_doctor_restricted(request.user):
+            readonly.append("doctor")
+        return readonly
 

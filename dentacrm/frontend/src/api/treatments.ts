@@ -248,6 +248,15 @@ export function createToothRecord(
   });
 }
 
+export function cloneOdontogram(
+  treatmentId: string,
+): Promise<ToothRecord[]> {
+  return request<ToothRecord[]>({
+    method: "POST",
+    url: `/treatments/${treatmentId}/clone-odontogram/`,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Nested — treatment photos
 // ---------------------------------------------------------------------------

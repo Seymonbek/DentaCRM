@@ -253,6 +253,48 @@ class TreatmentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(
+        summary="Clone patient's last active odontogram state into this treatment",
+        responses={200: dict, 400: dict},
+    )
+    @action(detail=True, methods=["post"], url_path="clone-odontogram")
+    def clone_odontogram(self, request: Request, pk: str | None = None) -> Response:
+        treatment: Treatment = self.get_object()
+
+        # Check permissions
+        if not TreatmentPermission().has_object_permission(request, self, treatment):
+            return Response(
+                {
+                    "error": {
+                        "code": "PERMISSION_DENIED",
+                        "message": "Sizda bu davolashni o'zgartirish uchun ruxsat yo'q.",
+                        "details": {},
+                    }
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            from apps.odontogram.serializers import ToothRecordSerializer
+            from apps.odontogram.services import clone_last_odontogram_state
+
+            cloned_records = clone_last_odontogram_state(treatment)
+            return Response(
+                ToothRecordSerializer(cloned_records, many=True).data,
+                status=status.HTTP_200_OK,
+            )
+        except Exception as exc:  # noqa: BLE001
+            return Response(
+                {
+                    "error": {
+                        "code": "VALIDATION_ERROR",
+                        "message": str(exc),
+                        "details": {},
+                    }
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
 
 __all__ = ["TreatmentViewSet"]
 

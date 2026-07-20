@@ -91,3 +91,5 @@ TELEGRAM_CHAT_ID=your-chat-id
 - Python 3.11+
 - `kiro-cli` (auth qilingan)
 - Git repo
+
+cd /home/seymonbek/Downloads/ai-orchestrator-template-main/ai-orchestrator-template-main/dentacrm && make compose-up

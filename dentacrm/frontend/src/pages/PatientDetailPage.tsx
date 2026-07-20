@@ -17,11 +17,13 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { PatientTreatmentsView } from "@/components/treatments/PatientTreatmentsView";
 
-type TabKey = "timeline" | "odontogram" | "payments" | "photos";
+type TabKey = "timeline" | "treatments" | "odontogram" | "payments" | "photos";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "timeline",   label: "Tarix"      },
+  { key: "treatments", label: "Muolajalar" },
   { key: "odontogram", label: "Odontogram" },
   { key: "payments",   label: "To'lovlar"  },
   { key: "photos",     label: "Rasmlar"    },
@@ -146,6 +148,7 @@ export function PatientDetailPage(): JSX.Element {
 
           <div role="tabpanel">
             {tab === "timeline"   && <TimelineView events={history.data ?? []} loading={history.isLoading} />}
+            {tab === "treatments" && <PatientTreatmentsView patientId={id} />}
             {tab === "odontogram" && <OdontogramView teeth={odontogram.data ?? []} loading={odontogram.isLoading} />}
             {tab === "payments"   && <PaymentsView balance={balance.data ?? null} loading={balance.isLoading} />}
             {tab === "photos"     && (

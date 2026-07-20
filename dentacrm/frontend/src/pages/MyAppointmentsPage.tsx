@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { format, formatDistanceToNow, isFuture } from "date-fns";
 import { uz } from "date-fns/locale";
 import { CalendarDays, CheckCircle2, Clock, User, XCircle, AlertCircle, PlayCircle, CheckCheck } from "lucide-react";
@@ -129,7 +130,9 @@ export function MyAppointmentsPage(): JSX.Element {
                       {/* Patient */}
                       <div className="flex items-center gap-2">
                         <User className="h-3.5 w-3.5 text-fg-3" aria-hidden="true" />
-                        <p className="text-[14px] font-semibold text-fg">{patientName}</p>
+                        <Link to={`/patients/${appt.patientId}`} className="text-[14px] font-semibold text-brand-500 hover:underline">
+                          {patientName}
+                        </Link>
                       </div>
 
                       {/* Time range */}

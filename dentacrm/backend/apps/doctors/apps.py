@@ -10,4 +10,4 @@ class DoctorsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.doctors"
     label = "doctors"
-    verbose_name = "Doctors"
+    verbose_name = "Shifokorlar"

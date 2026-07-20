@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -177,6 +178,19 @@ class MaterialUsage(BaseModel):
         blank=True,
         verbose_name=_("Yozgan foydalanuvchi"),
     )
+
+    def clean(self) -> None:
+        super().clean()
+        if self.material_id and self.quantity_used:
+            if self._state.adding:
+                if self.quantity_used > self.material.quantity_in_stock:
+                    raise ValidationError(
+                        {
+                            "quantity_used": [
+                                f"Zaxirada yetarli material yo'q. Faqat {self.material.quantity_in_stock} {self.material.unit} bor."
+                            ]
+                        }
+                    )
 
     class Meta:
         verbose_name = _("Material sarflash")

@@ -10,4 +10,7 @@ class PrescriptionsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.prescriptions"
     label = "prescriptions"
-    verbose_name = "Prescriptions"
+    verbose_name = "Retseptlar"
+
+    def ready(self) -> None:
+        from . import signals  # noqa: F401

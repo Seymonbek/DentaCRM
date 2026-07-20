@@ -10,7 +10,7 @@ class RatingsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.ratings"
     label = "ratings"
-    verbose_name = "Ratings"
+    verbose_name = "Reyting va Nishonlar"
 
     def ready(self) -> None:  # pragma: no cover - import side-effect
         # Importing ``signals`` wires post_save hooks to

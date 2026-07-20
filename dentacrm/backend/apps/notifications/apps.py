@@ -15,7 +15,7 @@ class NotificationsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.notifications"
     label = "notifications"
-    verbose_name = "Notifications"
+    verbose_name = "Bildirishnomalar"
 
     def ready(self) -> None:  # pragma: no cover - import side-effect
         # Load signal module so the ``notification_enqueued`` signal is

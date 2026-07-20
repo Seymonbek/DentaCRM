@@ -10,7 +10,7 @@ class InventoryConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.inventory"
     label = "inventory"
-    verbose_name = "Inventory"
+    verbose_name = "Sklad va Ombor"
 
     def ready(self) -> None:  # pragma: no cover - import side-effect
         # Importing ``signals`` binds the post_save handlers on

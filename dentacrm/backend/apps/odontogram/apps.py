@@ -10,4 +10,4 @@ class OdontogramConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.odontogram"
     label = "odontogram"
-    verbose_name = "Odontogram"
+    verbose_name = "Tish Kartasi (Odontogram)"

@@ -10,7 +10,7 @@ class TreatmentsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.treatments"
     label = "treatments"
-    verbose_name = "Treatments"
+    verbose_name = "Davolash Yozuvlari"
 
     def ready(self) -> None:  # pragma: no cover - import side-effect
         # Register post_save signal for thumbnail generation.

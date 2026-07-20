@@ -10,4 +10,4 @@ class DepartmentsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.departments"
     label = "departments"
-    verbose_name = "Departments"
+    verbose_name = "Bo'limlar"

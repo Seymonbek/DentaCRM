@@ -140,7 +140,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
+    # "django.middleware.locale.LocaleMiddleware",  # Disabled to force 'uz' language globally
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -621,9 +621,9 @@ SIMPLE_HISTORY_REVERT_DISABLED = True
 # Django Unfold Configuration (T133)
 # ---------------------------------------------------------------------------
 UNFOLD = {
-    "SITE_TITLE": "DentaCRM Admin",
+    "SITE_TITLE": "DentaCRM Premium Admin",
     "SITE_HEADER": "DentaCRM Admin",
-    "SITE_URL": "/admin/",
+    "SITE_SYMBOL": "medical_services",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": False,
     "THEME": "dark",  # default to dark mode to match our premium theme
@@ -642,5 +642,194 @@ UNFOLD = {
             "950": "9 9 11",
         },
     },
+    "ACCOUNT": {
+        "navigation": [
+            {
+                "title": "Saytni ko'rish",
+                "link": "/",
+                "icon": "visibility",
+            },
+            {
+                "title": "Parolni o'zgartirish",
+                "link": "/admin/password_change/",
+                "icon": "password",
+            },
+            {
+                "title": "Tizimdan chiqish",
+                "link": "/admin/logout/",
+                "icon": "logout",
+            },
+        ],
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": False,
+        "navigation": [
+            {
+                "title": "Boshqaruv & Rollar",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Foydalanuvchilar",
+                        "icon": "people",
+                        "link": "/admin/accounts/user/",
+                    },
+                    {
+                        "title": "Bo'limlar",
+                        "icon": "domain",
+                        "link": "/admin/departments/department/",
+                    },
+                ],
+            },
+            {
+                "title": "Shifokorlar",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Shifokor Profillari",
+                        "icon": "badge",
+                        "link": "/admin/doctors/doctorprofile/",
+                    },
+                    {
+                        "title": "Ish Vaqtlari",
+                        "icon": "schedule",
+                        "link": "/admin/doctors/workinghours/",
+                    },
+                    {
+                        "title": "Dam Olish Kunlari",
+                        "icon": "event_busy",
+                        "link": "/admin/doctors/timeoff/",
+                    },
+                    {
+                        "title": "Muolaja Turlari",
+                        "icon": "healing",
+                        "link": "/admin/doctors/proceduretype/",
+                    },
+                ],
+            },
+            {
+                "title": "Bemorlar & Qabullar",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Bemorlar Ro'yxati",
+                        "icon": "person",
+                        "link": "/admin/patients/patient/",
+                    },
+                    {
+                        "title": "Tashriflar & Qabullar",
+                        "icon": "calendar_month",
+                        "link": "/admin/scheduling/appointment/",
+                    },
+                ],
+            },
+            {
+                "title": "Davolash & Retseptlar",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Davolash Yozuvlari",
+                        "icon": "medical_information",
+                        "link": "/admin/treatments/treatment/",
+                    },
+                    {
+                        "title": "Davolash Rasmlari",
+                        "icon": "photo_library",
+                        "link": "/admin/treatments/treatmentphoto/",
+                    },
+                    {
+                        "title": "Odontogram Yozuvlari",
+                        "icon": "dentistry",
+                        "link": "/admin/odontogram/toothrecord/",
+                    },
+                    {
+                        "title": "Retseptlar",
+                        "icon": "assignment",
+                        "link": "/admin/prescriptions/prescription/",
+                    },
+                    {
+                        "title": "Retsept Shablonlari",
+                        "icon": "description",
+                        "link": "/admin/prescriptions/prescriptiontemplate/",
+                    },
+                ],
+            },
+            {
+                "title": "Moliya",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "To'lovlar",
+                        "icon": "payments",
+                        "link": "/admin/payments/payment/",
+                    },
+                    {
+                        "title": "Komissiya Yozuvlari",
+                        "icon": "account_balance_wallet",
+                        "link": "/admin/payments/commissionrecord/",
+                    },
+                ],
+            },
+            {
+                "title": "Sklad (Inventory)",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Materiallar",
+                        "icon": "inventory_2",
+                        "link": "/admin/inventory/material/",
+                    },
+                    {
+                        "title": "Ishlatilgan Materiallar",
+                        "icon": "outbox",
+                        "link": "/admin/inventory/materialusage/",
+                    },
+                    {
+                        "title": "Sklad Tarixi (Log)",
+                        "icon": "history",
+                        "link": "/admin/inventory/materialstocklog/",
+                    },
+                ],
+            },
+            {
+                "title": "Motivatsiya & Reyting",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Ball Yozuvlari",
+                        "icon": "star",
+                        "link": "/admin/ratings/scorelog/",
+                    },
+                    {
+                        "title": "Nishonlar (Badges)",
+                        "icon": "military_tech",
+                        "link": "/admin/ratings/badge/",
+                    },
+                    {
+                        "title": "Shifokor Nishonlari",
+                        "icon": "workspace_premium",
+                        "link": "/admin/ratings/doctorbadge/",
+                    },
+                ],
+            },
+            {
+                "title": "Tizim & Bildirishnomalar",
+                "separator": True,
+                "items": [
+                    {
+                        "title": "Bildirishnoma Loglari",
+                        "icon": "notifications",
+                        "link": "/admin/notifications/notificationlog/",
+                    },
+                    {
+                        "title": "OTP Kodlar",
+                        "icon": "security",
+                        "link": "/admin/accounts/otpcode/",
+                    },
+                ],
+            },
+        ],
+    },
 }
+
 

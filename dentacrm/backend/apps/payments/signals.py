@@ -16,6 +16,7 @@ import logging
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
+from apps.treatments.models import Treatment
 from .models import Payment
 from .services import _refresh_payment_status
 
@@ -32,6 +33,33 @@ def _on_payment_saved(sender, instance: Payment, created: bool, **kwargs):
             instance.treatment_id,
         )
 
+    if created and not instance.is_void:
+        try:
+            from apps.notifications.models import NotificationType
+            from apps.notifications.services import enqueue
+
+            patient = instance.treatment.patient
+            msg = (
+                f"Hurmatli {patient.first_name} {patient.last_name}, "
+                f"davolash muolajasi uchun {instance.amount:,.0f} so'm miqdoridagi "
+                f"to'lovingiz qabul qilindi. Rahmat!"
+            )
+            enqueue(
+                notification_type=NotificationType.PAYMENT_RECEIVED,
+                message=msg,
+                patient=patient,
+                context={
+                    "payment_id": str(instance.pk),
+                    "treatment_id": str(instance.treatment_id),
+                    "amount": str(instance.amount),
+                },
+            )
+        except Exception:  # noqa: BLE001
+            logger.exception(
+                "payments: failed to enqueue PAYMENT_RECEIVED notification for payment %s",
+                instance.pk,
+            )
+
 
 @receiver(post_delete, sender=Payment, dispatch_uid="payments.payment.refresh_on_delete")
 def _on_payment_deleted(sender, instance: Payment, **kwargs):
@@ -47,4 +75,18 @@ def _on_payment_deleted(sender, instance: Payment, **kwargs):
         )
 
 
-__all__ = ["_on_payment_saved", "_on_payment_deleted"]
+@receiver(post_save, sender=Treatment, dispatch_uid="payments.treatment.refresh_on_save")
+def _on_treatment_saved(sender, instance: Treatment, created: bool, **kwargs):
+    update_fields = kwargs.get("update_fields")
+    if update_fields and "payment_status" in update_fields:
+        return
+    try:
+        _refresh_payment_status(instance)
+    except Exception:  # noqa: BLE001
+        logger.exception(
+            "payments: refresh after treatment save failed for treatment %s",
+            instance.pk,
+        )
+
+
+__all__ = ["_on_payment_saved", "_on_payment_deleted", "_on_treatment_saved"]

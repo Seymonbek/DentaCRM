@@ -7,6 +7,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  cloneOdontogram,
   createToothRecord,
   createTreatment,
   deleteTreatment,
@@ -106,16 +107,18 @@ export function useCreateTreatment() {
   });
 }
 
-export function useUpdateTreatment(id: string) {
+export function useUpdateTreatment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: TreatmentUpdateInput) => updateTreatment(id, input),
+    mutationFn: ({ id, input }: { id: string; input: TreatmentUpdateInput }) =>
+      updateTreatment(id, input),
     onSuccess: (treatment) => {
       invalidatePatientScopedQueries(qc, treatment.patientId);
-      qc.setQueryData(treatmentsKeys.detail(id), treatment);
+      qc.invalidateQueries({ queryKey: treatmentsKeys.detail(treatment.id) });
     },
   });
 }
+
 
 export function useDeleteTreatment() {
   const qc = useQueryClient();
@@ -148,6 +151,19 @@ export function useUploadTreatmentPhoto(treatmentId: string) {
       uploadTreatmentPhoto(treatmentId, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: treatmentsKeys.photos(treatmentId) });
+      qc.invalidateQueries({ queryKey: treatmentsKeys.detail(treatmentId) });
+    },
+  });
+}
+
+export function useCloneOdontogram(treatmentId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => cloneOdontogram(treatmentId),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: treatmentsKeys.toothRecords(treatmentId),
+      });
       qc.invalidateQueries({ queryKey: treatmentsKeys.detail(treatmentId) });
     },
   });

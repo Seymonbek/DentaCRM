@@ -23,6 +23,8 @@ class UserAdmin(DjangoUserAdmin, ModelAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
+    list_filter_sheet = True
+
     ordering = ("last_name", "first_name")
     list_display = ("phone_number", "first_name", "last_name", "role", "is_active")
     list_filter = ("role", "is_active", "is_staff", "two_factor_enabled")

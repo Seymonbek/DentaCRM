@@ -10,7 +10,7 @@ class PaymentsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "apps.payments"
     label = "payments"
-    verbose_name = "Payments"
+    verbose_name = "Moliya va To'lovlar"
 
     def ready(self) -> None:  # pragma: no cover — import side-effect
         # Importing ``signals`` binds the post_save handler on Payment
