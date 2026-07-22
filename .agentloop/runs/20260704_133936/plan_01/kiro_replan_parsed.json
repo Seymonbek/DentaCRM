@@ -1,0 +1,157 @@
+{
+  "plan_name": "DentaCRM \u2014 Verification & E2E Hardening",
+  "phase": 6,
+  "done": false,
+  "notes": "Codebase is feature-complete against criteria 1\u201341. Remaining tasks close the two real gaps (Playwright e2e, backend test runner) and add belt-and-braces smoke coverage so done=true can be declared confidently on the next review pass.",
+  "tasks": [
+    {
+      "id": 101,
+      "phase": "6-polish",
+      "component": "backend",
+      "title": "Fix backend test runner invocation",
+      "description": "The orchestrator's test step invokes bare `python`, which is not on the host PATH. Update the test command (or wrapper) to use `dentacrm/backend/.venv/bin/python -m pytest` OR `docker compose run --rm backend pytest`. Then execute the full backend suite and paste the summary. Every test file under `dentacrm/backend/tests/` must be green.",
+      "depends_on": [],
+      "acceptance": "`.venv/bin/pytest -q` (from dentacrm/backend) exits 0. All 16 test modules (test_accounts, test_core, test_departments, test_doctors, test_patients, test_scheduling, test_treatments, test_odontogram, test_prescriptions, test_inventory, test_payments, test_ratings, test_reports, test_notifications, test_tasks, test_telegram_bot, test_seed_demo) collected and passed.",
+      "brief_criteria": [
+        15
+      ]
+    },
+    {
+      "id": 102,
+      "phase": "6-polish",
+      "component": "backend",
+      "title": "Re-verify RBAC coverage against the brief matrix",
+      "description": "Read the RBAC table in PROJECT_BRIEF and confirm each row has a matching pytest assertion (403 for denied roles, 200/201 for allowed). Add missing negative tests to `tests/test_accounts.py` or per-app test files: bosh_shifokor-only for /departments POST, /doctors POST, /reports/*; doctor cannot access /patients/new; administrator cannot POST /treatments/. Do not touch permissions.py unless a test fails \u2014 the goal is to prove existing behaviour.",
+      "depends_on": [
+        101
+      ],
+      "acceptance": "New/expanded parametric tests exist covering every cell in the RBAC matrix. Full pytest still green.",
+      "brief_criteria": [
+        4,
+        15
+      ]
+    },
+    {
+      "id": 103,
+      "phase": "6-polish",
+      "component": "frontend",
+      "title": "Add Playwright to frontend + config",
+      "description": "In `dentacrm/frontend`: `npm install --save-dev --save-exact @playwright/test@1.47.2` then commit `playwright.config.ts` targeting `http://localhost:5173` with `webServer.command = 'npm run dev'` and `webServer.reuseExistingServer = true`. Add `test:e2e`, `test:e2e:install` scripts. Create `e2e/` folder with `.gitkeep`. Ensure typecheck still passes.",
+      "depends_on": [],
+      "acceptance": "`npm run typecheck` and `npm run lint` still pass. `playwright.config.ts` exists. `package.json` has `test:e2e` and `test:e2e:install` scripts with exact-pinned Playwright.",
+      "brief_criteria": [
+        26
+      ]
+    },
+    {
+      "id": 104,
+      "phase": "6-polish",
+      "component": "frontend",
+      "title": "Playwright e2e \u2014 login flow",
+      "description": "Create `e2e/login.spec.ts`. Mock the /api/v1/auth/login/ and /api/v1/auth/me/ endpoints via Playwright's `page.route()` (do NOT depend on live backend for CI). Test: fill phone/password \u2192 expects redirect to /dashboard (bosh_shifokor), /my-appointments (doctor), /schedule (administrator).",
+      "depends_on": [
+        103
+      ],
+      "acceptance": "`npm run test:e2e -- login.spec.ts` passes locally (Playwright chromium). No network dependency.",
+      "brief_criteria": [
+        18,
+        19,
+        26
+      ]
+    },
+    {
+      "id": 105,
+      "phase": "6-polish",
+      "component": "frontend",
+      "title": "Playwright e2e \u2014 full clinic flow (patient \u2192 appointment \u2192 treatment \u2192 payment)",
+      "description": "Create `e2e/flow.spec.ts`. Mock the whole /api/v1/ surface (patients, doctors, appointments, treatments, payments) with Playwright routing. Steps: administrator logs in \u2192 creates patient at /patients/new \u2192 schedules appointment at /appointments/new \u2192 doctor logs in (2nd context) \u2192 opens patient \u2192 records treatment with a tooth entry \u2192 posts a payment \u2192 asserts toast + updated balance. Assert URLs and DOM state at each step.",
+      "depends_on": [
+        104
+      ],
+      "acceptance": "Spec exits 0 on chromium. Covers criteria 42 (end-to-end) with a single automated flow.",
+      "brief_criteria": [
+        21,
+        22,
+        24,
+        25,
+        26,
+        38,
+        42
+      ]
+    },
+    {
+      "id": 106,
+      "phase": "6-polish",
+      "component": "infra",
+      "title": "Wire Playwright into CI",
+      "description": "Extend `.github/workflows/ci.yml` frontend job with a step `npx playwright install --with-deps chromium` before running `npm run test:e2e`. Cache `~/.cache/ms-playwright`. Keep runtime under the existing 15-minute timeout.",
+      "depends_on": [
+        105
+      ],
+      "acceptance": "CI YAML parses (`yamllint`/`docker compose config` unaffected). Job runs Playwright after Vitest.",
+      "brief_criteria": [
+        26,
+        29
+      ]
+    },
+    {
+      "id": 107,
+      "phase": "6-polish",
+      "component": "backend",
+      "title": "Add integration smoke test for full clinic flow",
+      "description": "New `tests/test_clinic_flow.py`: use APIClient to (1) POST /auth/login/ as bosh_shifokor, (2) create department, doctor, patient, appointment, (3) create treatment with tooth records and material usage, (4) upload a small in-memory image, (5) POST /payments/, (6) GET /patients/{id}/balance/ and /doctors/{id}/commissions/ and assert the numbers. Uses factory_boy/APITestCase, no external services.",
+      "depends_on": [
+        101
+      ],
+      "acceptance": "New test collected and passes. Exercises models across scheduling+treatments+odontogram+inventory+payments in one transaction, proving criterion 42 at the API level.",
+      "brief_criteria": [
+        6,
+        8,
+        9,
+        12,
+        42
+      ]
+    },
+    {
+      "id": 108,
+      "phase": "6-polish",
+      "component": "frontend",
+      "title": "Audit Skeleton/Toast/EmptyState coverage on every page",
+      "description": "Grep every page under `src/pages/` for `useQuery`/`isPending` blocks. Any that shows raw text like 'Yuklanmoqda\u2026' or a blank div in the loading branch must be swapped to `<Skeleton>`. Any error branch that doesn't push a toast via `notificationStore` must be fixed. Any empty list branch must render `<EmptyState>`. Do NOT rewrite pages that already comply.",
+      "depends_on": [],
+      "acceptance": "Manual grep report attached showing each page uses one of the three components in its loading/error/empty branches. Frontend tests still 38/38 green.",
+      "brief_criteria": [
+        30,
+        34
+      ]
+    },
+    {
+      "id": 109,
+      "phase": "6-polish",
+      "component": "frontend",
+      "title": "Odontogram interaction test (Vitest)",
+      "description": "Expand `src/components/odontogram/Odontogram.test.tsx` with tests for: click on tooth 11 triggers onSelect(11); rendering with status='treated' applies the blue color class; keyboard Enter on a tooth also fires onSelect (accessibility). Use existing testing-library setup.",
+      "depends_on": [],
+      "acceptance": "3 new tests added, all green. FDI numbering assertions (11\u201348) preserved.",
+      "brief_criteria": [
+        22,
+        39
+      ]
+    },
+    {
+      "id": 110,
+      "phase": "6-polish",
+      "component": "docs",
+      "title": "README acceptance-criteria checklist + how-to-run",
+      "description": "In `dentacrm/README.md`, add: (a) one-command bring-up recipe (`cp .env.example .env && docker compose up --build`), (b) a table mapping each of the 43 acceptance criteria to the file(s) that satisfy it, (c) test commands (backend via .venv, frontend vitest, playwright). No changes to code.",
+      "depends_on": [
+        107,
+        105
+      ],
+      "acceptance": "README updated. All links resolve. `docker compose config` and `pytest` and `vitest`/`playwright` commands are copy-paste runnable.",
+      "brief_criteria": [
+        43
+      ]
+    }
+  ]
+}

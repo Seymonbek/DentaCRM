@@ -1,0 +1,261 @@
+{
+  "decisions": [],
+  "key_files": [
+    {
+      "path": "dentacrm/frontend/src/store/uiStore.ts",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/app/ThemeProvider.tsx",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/App.tsx",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/index.css",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/tailwind.config.js",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/components/ui/Skeleton.tsx",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/components/ui/EmptyState.tsx",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/pages/DashboardPage.tsx",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/frontend/src/components/ui/DataTable.test.tsx",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/tests/test_inventory.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/reports/__init__.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/reports/apps.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/reports/selectors.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/reports/services.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/reports/permissions.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/Makefile",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/README.md",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/tests/test_reports.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "agentloop.toml",
+      "purpose": "recently changed"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/.env.example",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/.env.prod.example",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/core/idempotency.py",
+      "purpose": "recently changed"
+    },
+    {
+      "path": "dentacrm/backend/apps/core/logging.py",
+      "purpose": "recently changed"
+    }
+  ],
+  "architecture": "",
+  "blockers": [
+    {
+      "issue": "dentacrm/.env: A concrete `.env` file was created in the working tree (byte-identical to .env.exampl",
+      "timestamp": 1783155306.2012274
+    },
+    {
+      "issue": "dentacrm/backend/config/settings/prod.py: prod.py enforces DJANGO_ALLOWED_HOSTS but does not validat",
+      "timestamp": 1783155306.2016425
+    },
+    {
+      "issue": "dentacrm/frontend/src/pages/: 16 sahifadan 15 tasi (Dashboard, Departments, Doctors, DoctorDetail, F",
+      "timestamp": 1783166587.1270552
+    },
+    {
+      "issue": "dentacrm/backend/apps/: 6 ta backend app yo'q: `inventory`, `payments`, `ratings`, `notifications`, ",
+      "timestamp": 1783166587.1273081
+    },
+    {
+      "issue": "dentacrm/frontend/src/store/uiStore.ts: Theme state faqat `\"light\" | \"dark\"` \u2014 'system' variant yo'q",
+      "timestamp": 1783166587.1275194
+    },
+    {
+      "issue": "dentacrm/backend/apps/telegram_bot/: Entire telegram_bot app is missing. PROJECT_BRIEF \u00a7 'Telegram B",
+      "timestamp": 1783174960.9931607
+    },
+    {
+      "issue": "dentacrm/backend/apps/*/tasks.py: No app has a tasks.py. Criterion 11 requires send_appointment_remi",
+      "timestamp": 1783174960.9934537
+    },
+    {
+      "issue": "dentacrm/backend/apps/treatments/models.py: TreatmentPhoto has no thumbnail field and no post_save s",
+      "timestamp": 1783174960.9943163
+    },
+    {
+      "issue": "dentacrm/frontend/src/pages/PatientDetailPage.tsx: Photos tab renders EmptyState with 'Rasmlar tez o",
+      "timestamp": 1783185314.1842964
+    },
+    {
+      "issue": "dentacrm/frontend/src/components/forms/: TreatmentForm component is missing. Doctors have no way to ",
+      "timestamp": 1783185314.184576
+    },
+    {
+      "issue": ".agentloop/runs/20260704_133936/plan_04/review_01/test_backend.md: The most recent recorded backend ",
+      "timestamp": 1783195822.0525894
+    },
+    {
+      "issue": "agentloop.toml: Backend `[[project.tests]]` command is `./.venv/bin/python -m pytest --tb=short -q` ",
+      "timestamp": 1783198831.2254357
+    },
+    {
+      "issue": "dentacrm/README.md: The builder is repeatedly appending 'verification-log' rows to the README claimi",
+      "timestamp": 1783198831.2266881
+    },
+    {
+      "issue": "ai_orchestrator/orchestrator.py: The orchestrator process running THIS cycle still emits `\u2500\u2500 backend",
+      "timestamp": 1783206267.4510036
+    },
+    {
+      "issue": "ai_orchestrator/orchestrator.py: T116 fix (cfg_path re-read of project.tests / project.test_command)",
+      "timestamp": 1783206571.307897
+    },
+    {
+      "issue": "Live orchestrator process pre-dates the T116 patch on disk. Python does not hot-reload modules, so the running run_tests is the pre-T116 version regardless of what the file says now. Requires operator process restart to load the fix. This is a lifecycle event, not a project defect \u2014 flagged in .kiro/steering/runner_lifecycle.md as the invariant to prevent re-entering the closed loop.",
+      "timestamp": 1783207559.2817013
+    },
+    {
+      "issue": "Live orchestrator process must be restarted by an operator; a builder cycle cannot reload another process's Python module memory.",
+      "timestamp": 1783230499.2899182
+    }
+  ],
+  "completed_tasks": [
+    {
+      "task": "Faza 3 finalized: verified apps/inventory/ end-to-end (25 tests, RBAC, signal-driven stock decrement",
+      "timestamp": 1783167908.0439982
+    },
+    {
+      "task": "Confirmed Faza 3 (inventory app + 3-theme UI system) is complete and all suites are green. Made thre",
+      "timestamp": 1783171620.5188458
+    },
+    {
+      "task": "Faza 3 (inventory) va theme fix reviewer talab qilgan holatda \u2014 allaqachon implement qilingan; oxirg",
+      "timestamp": 1783172738.7171223
+    },
+    {
+      "task": "Verified reviewer's Phase 3 instruction (inventory + theme + gitignore) is complete and all verifica",
+      "timestamp": 1783174813.209296
+    },
+    {
+      "task": "Backend Celery + Telegram bundle from reviewer directive was fully implemented in prior iterations. ",
+      "timestamp": 1783178822.0846736
+    },
+    {
+      "task": "Verified the backend Celery + Telegram bundle from the reviewer directive is fully implemented: Trea",
+      "timestamp": 1783184333.4297214
+    },
+    {
+      "task": "Verified that the reviewer's directed backend Celery + Telegram bundle is fully implemented: Treatme",
+      "timestamp": 1783185167.5953968
+    },
+    {
+      "task": "Continued the phase-6 polish cycle. Verified the prior-run additions (Playwright config, e2e login/f",
+      "timestamp": 1783188350.0510366
+    },
+    {
+      "task": "Previous builder had completed plan tasks 101\u2013110. I verified end-to-end: 430 pytest tests pass (inc",
+      "timestamp": 1783189424.4198678
+    },
+    {
+      "task": "Ran task 113's full 9-step verification sequence. Discovered and fixed one real regression in tests/",
+      "timestamp": 1783193552.090902
+    },
+    {
+      "task": "Verified T114 + T115 end-to-end. Fresh runner-parsed cycle executed both [[project.tests]] entries f",
+      "timestamp": 1783195593.2599077
+    },
+    {
+      "task": "Captured a fresh orchestrator-runner-compatible green artifact per reviewer's direct instruction. Ra",
+      "timestamp": 1783197659.546003
+    },
+    {
+      "task": "Reviewer-mandated fresh runner-path proof captured. Executed both agentloop.toml [[project.tests]] c",
+      "timestamp": 1783198622.7949786
+    },
+    {
+      "task": "Applied reviewer-directed fix to agentloop.toml: backend [[project.tests]] block now uses inline `cd",
+      "timestamp": 1783200747.474564
+    },
+    {
+      "task": "Confirmed the reviewer-directed inline-cd fix is already applied in agentloop.toml (backend command ",
+      "timestamp": 1783202725.242649
+    },
+    {
+      "task": "T116 (orchestrator run_tests() config-reload fix) verified in place \u2014 cfg_path kwarg present, disk-r",
+      "timestamp": 1783206120.3460388
+    },
+    {
+      "task": "No files edited this cycle. Verified T116 patch is in place and functional: run_tests has cfg_path k",
+      "timestamp": 1783207559.2810256
+    },
+    {
+      "task": "No source edit. Verified T116 patch is on disk (run_tests signature contains cfg_path) and reproduce",
+      "timestamp": 1783230499.289513
+    },
+    {
+      "task": "No new file changes this iteration \u2014 all 10 planned hardening tasks (T118 throttling, T119 password ",
+      "timestamp": 1783240303.6706312
+    },
+    {
+      "task": "T128-T133 discovery-round-2 hardening batch was already implemented by the previous builder cycle be",
+      "timestamp": 1783248085.3291857
+    }
+  ],
+  "agent_notes": {
+    "reviewer": {
+      "next_tasks": [
+        "Hand off to orchestrator for done=true and (optionally) commit the working-tree changes. If a commit is authored, use a single feat(dentacrm) message covering T128-T133 with the 22 changed paths listed by the builder. All six tasks were verified in a single pytest run so a single commit preserves atomicity."
+      ]
+    }
+  }
+}

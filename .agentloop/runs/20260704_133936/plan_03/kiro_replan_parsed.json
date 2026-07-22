@@ -1,0 +1,36 @@
+{
+  "plan_name": "DentaCRM \u2014 Final runner de-risk & sign-off",
+  "phase": 6,
+  "done": false,
+  "notes": "All 43 acceptance criteria are code-complete. Two verification-log entries in dentacrm/README.md document a full manual green-light run (438 backend + 41 frontend tests, ruff, tsc, eslint, build, prod compose config, Playwright dry-list). The only outstanding issue is that the orchestrator's own automated test runner recorded `bash: line 1: python: command not found` in latest_test_output despite agentloop.toml already using a venv-guarded command. Task 114 replaces the compound bash guard with an explicit, unambiguous invocation so the runner cannot regress. Task 115 forces one clean automated cycle and, on green, flips done=true.",
+  "tasks": [
+    {
+      "id": 114,
+      "phase": "6-verify",
+      "component": "infra",
+      "title": "De-risk the automated backend test command in agentloop.toml",
+      "description": "The current `[[project.tests]]` backend `command` uses a compound `{ [ -x ./.venv/bin/python ] && PY=./.venv/bin/python || PY=python3; } && $PY -m pytest ...` guard. It is logically correct but has failed in the automated runner at least once this cycle (see `latest_test_output`: `bash: line 1: python: command not found`). Replace it with an unambiguous form that cannot silently fall back to a bare `python` interpreter.\n\nConcrete edits in `agentloop.toml` (repo root):\n\n1. `[[project.tests]] backend.command` \u2014 set to exactly:\n\n     command = \"./.venv/bin/python -m pytest --tb=short -q\"\n\n   The venv MUST exist in this repo (it does \u2014 `dentacrm/backend/.venv/bin/python` was created during earlier phases). If a future clean checkout is missing it, `make backend-venv && make backend-install` reconstructs it. Do NOT keep a `python3` fallback in the automated runner: silent fallback is exactly what has been masking the failure.\n\n2. Top-level `test_command` \u2014 same treatment:\n\n     test_command = \"cd dentacrm/backend && ./.venv/bin/python -m pytest --tb=short -q && cd ../frontend && npm run test -- --run\"\n\n3. Add a one-line comment above each entry explaining that the venv is a required precondition and pointing at `make backend-venv` for reconstruction.\n\nDo NOT touch anything under `dentacrm/` \u2014 the tests, fixtures, and Makefile are already correct. Do NOT modify the orchestrator code (`ai_orchestrator/orchestrator.py`); the fix belongs in configuration.\n\nAfter the edit, from the repo root, execute the exact command the runner would run to prove it works end-to-end (do NOT reuse the manual `make` path \u2014 we need to prove the config itself is sound):\n\n    cd dentacrm/backend && bash -lc \"./.venv/bin/python -m pytest --tb=short -q\"\n\nPaste the last 30 lines of output in the builder report. All tests (438) must pass. Any failure is a real regression and must be root-caused, not skipped.",
+      "depends_on": [],
+      "acceptance": "1) `agentloop.toml` diff shows the simplified explicit-venv command in both `test_command` and `[[project.tests]] backend.command`. 2) `grep -E '\\{|\\|\\|' agentloop.toml` returns no matches inside the two test-command lines. 3) The literal command `cd dentacrm/backend && bash -lc \"./.venv/bin/python -m pytest --tb=short -q\"` executed from the repo root exits 0 and reports the full 438-test collection green. 4) Output pasted in the builder report.",
+      "brief_criteria": [
+        15
+      ]
+    },
+    {
+      "id": 115,
+      "phase": "6-verify",
+      "component": "meta",
+      "title": "One clean automated cycle \u2192 declare done=true",
+      "description": "This is a pure verification task. Trigger the orchestrator's own test path (do NOT run `make check` \u2014 that path is already logged as green; we need proof the runner itself observes success) and confirm both suites go green in the automated pipeline that produced `latest_test_output`.\n\nSequence:\n\n  1. From the repo root, simulate the runner's `run_tests()` behavior for the backend entry:\n         cd dentacrm/backend && bash -lc \"$(python3 -c \\\"import tomllib,sys;print(tomllib.load(open('../../agentloop.toml','rb'))['project']['tests'][0]['command'])\\\")\"\n     Confirm exit 0.\n  2. Repeat for the frontend entry (cwd `dentacrm/frontend`). Confirm exit 0.\n  3. Append a third row to the `## Verification log` table in `dentacrm/README.md` with today's date, a short commit hash, and the one-liner: `Automated runner cycle \u2014 backend (venv pytest) + frontend (vitest) both green from parsed agentloop.toml commands.`\n  4. In the builder report, state explicitly: `done=true \u2014 all 43 acceptance criteria met, both manual (make check) and automated (agentloop.toml-parsed) test paths green.`\n\nDo NOT attempt to run Playwright on the orchestrator host if chromium is not installed there \u2014 the CI job in `.github/workflows/ci.yml` already handles browser installation and `npx playwright test --list` (which parses the config without downloading a browser) has already been proven green in the previous verification log entry.\n\nIf either automated invocation still fails, DO NOT flip done. Instead, capture the exact stderr and treat it as a fresh root-cause investigation \u2014 the fix in task 114 was the last simplification available; any remaining failure indicates something outside configuration (e.g., a missing package in the venv). In that case escalate as a new task 116 rather than silently patching around it.",
+      "depends_on": [
+        114
+      ],
+      "acceptance": "1) Both `[[project.tests]]` commands, parsed directly from `agentloop.toml` and executed under `bash -lc`, exit 0 in the same session. 2) A third row exists in `dentacrm/README.md` verification log with today's date. 3) The next orchestrator cycle's `latest_test_output` shows `\u2500\u2500 backend (\u2705) \u2500\u2500` alongside `\u2500\u2500 frontend (\u2705) \u2500\u2500`. 4) The following plan sets `done=true`.",
+      "brief_criteria": [
+        15,
+        42,
+        43
+      ]
+    }
+  ]
+}

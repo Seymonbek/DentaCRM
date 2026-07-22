@@ -1,0 +1,19 @@
+{
+  "done": false,
+  "reason": "Auto-discovery found new tasks.",
+  "plan_cycles_completed": 5,
+  "total_build_iterations": 57,
+  "cost": {
+    "total_cost_usd": 10.3,
+    "max_cost_usd": 0.0
+  },
+  "metrics": {
+    "total_duration_sec": 6117.58,
+    "total_builds": 2,
+    "total_reviews": 1,
+    "review_pass_rate": 1.0,
+    "avg_build_duration": 2460.52,
+    "total_files_changed": 22
+  },
+  "logs": "/home/seymonbek/Downloads/ai-orchestrator-template-main/ai-orchestrator-template-main/.agentloop/runs/20260704_133936"
+}

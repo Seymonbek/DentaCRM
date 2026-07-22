@@ -1,0 +1,44 @@
+[
+  {
+    "component": "agents.planner",
+    "command": "kiro-cli",
+    "agent": "ai-planner",
+    "agent_file_exists": true,
+    "ok": true
+  },
+  {
+    "component": "agents.builder",
+    "command": "kiro-cli",
+    "agent": "ai-builder",
+    "agent_file_exists": true,
+    "ok": true
+  },
+  {
+    "component": "agents.reviewer",
+    "command": "kiro-cli",
+    "agent": "ai-reviewer",
+    "agent_file_exists": true,
+    "ok": true
+  },
+  {
+    "component": "kiro",
+    "enabled": true,
+    "command": "kiro-cli",
+    "ok": true
+  },
+  {
+    "component": "kiro_builder",
+    "enabled": true,
+    "command": "kiro-cli",
+    "ok": true
+  },
+  {
+    "component": "git",
+    "ok": true,
+    "note": "recommended for change tracking"
+  },
+  {
+    "component": "brief",
+    "ok": true
+  }
+]

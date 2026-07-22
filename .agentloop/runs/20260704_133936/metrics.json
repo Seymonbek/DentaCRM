@@ -1,0 +1,62 @@
+{
+  "builds": [
+    {
+      "plan_cycle": 5,
+      "review_cycle": 2,
+      "build_iter": 1,
+      "duration_sec": 3811.84,
+      "files_changed": [],
+      "success": true,
+      "timestamp": "2026-07-05T15:22:55.976636"
+    },
+    {
+      "plan_cycle": 5,
+      "review_cycle": 2,
+      "build_iter": 2,
+      "duration_sec": 1109.2,
+      "files_changed": [
+        "dentacrm/.env.example",
+        "dentacrm/.env.prod.example",
+        "dentacrm/README.md",
+        "dentacrm/backend/apps/core/idempotency.py",
+        "dentacrm/backend/apps/core/logging.py",
+        "dentacrm/backend/apps/core/middleware.py",
+        "dentacrm/backend/apps/payments/views.py",
+        "dentacrm/backend/apps/treatments/management/__init__.py",
+        "dentacrm/backend/apps/treatments/management/commands/__init__.py",
+        "dentacrm/backend/apps/treatments/management/commands/orphan_photo_cleanup.py",
+        "dentacrm/backend/apps/treatments/services.py",
+        "dentacrm/backend/apps/treatments/tasks.py",
+        "dentacrm/backend/config/celery.py",
+        "dentacrm/backend/config/settings/base.py",
+        "dentacrm/backend/config/settings/prod.py",
+        "dentacrm/backend/tests/conftest.py",
+        "dentacrm/backend/tests/test_idempotency.py",
+        "dentacrm/backend/tests/test_json_logging.py",
+        "dentacrm/backend/tests/test_orphan_cleanup.py",
+        "dentacrm/backend/tests/test_photo_upload_validation.py",
+        "dentacrm/backend/tests/test_prod_security.py",
+        "dentacrm/frontend/e2e/a11y.spec.ts"
+      ],
+      "success": true,
+      "timestamp": "2026-07-05T15:41:25.327922"
+    }
+  ],
+  "reviews": [
+    {
+      "plan_cycle": 5,
+      "review_cycle": 2,
+      "verdict": "pass",
+      "duration_sec": 90.58,
+      "timestamp": "2026-07-05T15:57:24.910503"
+    }
+  ],
+  "summary": {
+    "total_duration_sec": 6117.58,
+    "total_builds": 2,
+    "total_reviews": 1,
+    "review_pass_rate": 1.0,
+    "avg_build_duration": 2460.52,
+    "total_files_changed": 22
+  }
+}

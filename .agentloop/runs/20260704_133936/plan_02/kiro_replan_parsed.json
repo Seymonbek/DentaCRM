@@ -1,0 +1,93 @@
+{
+  "plan_name": "DentaCRM \u2014 Verification Unblock & Final Sign-off",
+  "phase": 6,
+  "done": false,
+  "notes": "The codebase satisfies criteria 1\u201343 at the code level. Only the automated verifier is blocked: agentloop.toml still uses bare `python`. Once the runner is pointed at the venv (task 111), backend pytest + test_clinic_flow.py execute and criteria 15 & 42 are provably green. Task 112 sweeps the two soft gaps (RBAC negative tests, Skeleton audit report). Task 113 runs one final full-stack verification and declares done.",
+  "tasks": [
+    {
+      "id": 111,
+      "phase": "6-verify",
+      "component": "infra",
+      "title": "Point agentloop.toml at the venv-based pytest",
+      "description": "Edit `agentloop.toml` at repo root. Change both the top-level `test_command` and the `[[project.tests]]` entry named 'backend' so pytest is invoked via the venv that already exists at `dentacrm/backend/.venv/bin/python`. Concretely:\n\n  - `[[project.tests]] backend.command` \u2192 `./.venv/bin/python -m pytest --tb=short -q` (cwd stays `dentacrm/backend`).\n  - `test_command` \u2192 `cd dentacrm/backend && ./.venv/bin/python -m pytest --tb=short -q && cd ../frontend && npm run test -- --run`.\n\nAlso add a fallback: if `.venv` is missing, fall back to `python3 -m pytest`. Do NOT touch anything under `dentacrm/`. This is a one-line configuration change that unblocks the whole verification loop.\n\nAfter the edit, run `./dentacrm/backend/.venv/bin/python -m pytest --tb=short -q` from `dentacrm/backend` and paste the summary. Every test module (17 files) must be collected; all must be green. If any test fails, that failure is the real work \u2014 investigate and fix root cause; do NOT skip or xfail without justification.",
+      "depends_on": [],
+      "acceptance": "1) `agentloop.toml` diff shows the venv-based interpreter for the backend test step. 2) `cd dentacrm/backend && ./.venv/bin/python -m pytest --tb=short -q` exits 0. 3) `test_clinic_flow.py` is in the collected set and passes. 4) The next automated test run in the loop reports backend=\u2705 instead of `bash: line 1: python: command not found`.",
+      "brief_criteria": [
+        15,
+        42
+      ]
+    },
+    {
+      "id": 112,
+      "phase": "6-verify",
+      "component": "backend+frontend",
+      "title": "Close the two soft gaps (RBAC negative matrix + Skeleton audit)",
+      "description": "Two small, orthogonal deliverables:\n\n(a) BACKEND \u2014 audit RBAC coverage. For each row in the PROJECT_BRIEF RBAC table, confirm at least one pytest asserts 403 for a denied role. Concretely add or extend `tests/test_accounts.py` with a parametrised `test_rbac_matrix` that hits: POST /departments/ (denied: doctor, administrator), POST /doctors/ (denied: doctor, administrator), POST /treatments/ (denied: administrator), GET /reports/dashboard/ (denied: doctor, administrator). Use existing factory_boy fixtures. If any of these matrix cells already has a dedicated test elsewhere, add a comment linking to it instead of duplicating.\n\n(b) FRONTEND \u2014 Skeleton/Toast/EmptyState audit. Grep `frontend/src/pages/*.tsx` for `isPending`, `isLoading`, `isError` and `data?.results?.length === 0`. For every page, confirm one of: `<Skeleton>` in the loading branch, `useToast()`/notificationStore push in the error branch, `<EmptyState>` in the empty branch. Any page missing one of the three MUST be fixed. Write the audit summary as a Markdown table in `dentacrm/frontend/docs/ui-audit.md` (create the `docs/` folder if absent) so criterion 30/34 can be re-verified without re-grep.\n\nDo not touch any page that already complies. Keep changes minimal.",
+      "depends_on": [
+        111
+      ],
+      "acceptance": "1) `tests/test_accounts.py::test_rbac_matrix` (or a new file) covers every row of the RBAC table with parametrised assertions; full pytest still green. 2) `frontend/docs/ui-audit.md` exists and lists every page under `src/pages/` with a \u2705/\u26a0\ufe0f column for Loading/Error/Empty. Any \u26a0\ufe0f in the audit corresponds to a diff that adds the missing component. 3) vitest still 41/41 green.",
+      "brief_criteria": [
+        4,
+        15,
+        30,
+        34
+      ]
+    },
+    {
+      "id": 113,
+      "phase": "6-verify",
+      "component": "meta",
+      "title": "Full-stack green-light run and declare done",
+      "description": "Run the complete verification sequence and paste the results:\n\n  1. `make backend-lint`           \u2192 ruff green\n  2. `make backend-check`          \u2192 `manage.py check` green\n  3. `make backend-test`           \u2192 all pytest tests green (must include test_clinic_flow)\n  4. `make frontend-lint`          \u2192 eslint green\n  5. `make frontend-typecheck`     \u2192 tsc green\n  6. `make frontend-test`          \u2192 all vitest tests green\n  7. `make frontend-build`         \u2192 vite build green\n  8. `docker compose -f dentacrm/docker-compose.yml config >/dev/null` \u2192 dev compose valid\n  9. `docker compose -f dentacrm/docker-compose.prod.yml config >/dev/null` \u2192 prod compose valid (after `cp .env.prod.example .env` inside dentacrm/)\n\nDo NOT attempt to run `make frontend-e2e` on the orchestrator host if chromium is not installed \u2014 the CI job handles that. Instead, confirm the Playwright config parses via `cd dentacrm/frontend && npx playwright test --list` (returns the two spec titles without running them).\n\nWhen every command exits 0, add a one-line entry to `dentacrm/README.md` under a new `## Verification log` section noting the date and a short commit hash, then flip `done=true` in the next plan.",
+      "depends_on": [
+        112
+      ],
+      "acceptance": "All 9 commands exit 0 in one contiguous session. Output pasted in the builder's report so the reviewer can verify. README has a verification log entry. Next plan sets `done=true`.",
+      "brief_criteria": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ]
+    }
+  ]
+}
