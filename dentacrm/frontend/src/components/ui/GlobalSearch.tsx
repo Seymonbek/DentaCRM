@@ -16,7 +16,7 @@ interface SearchResult {
 
 const TYPE_CONFIG = {
   patient: { icon: User,        color: "text-brand-400",  bg: "bg-brand-500/10",  label: "Bemor"    },
-  doctor:  { icon: Stethoscope, color: "text-violet-400", bg: "bg-violet-500/10", label: "Shifokor" },
+  doctor:  { icon: Stethoscope, color: "text-sky-400",    bg: "bg-sky-500/10",    label: "Shifokor" },
 } as const;
 
 interface GlobalSearchProps {
@@ -111,7 +111,7 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps): JSX.Element 
       {/* Backdrop */}
       <div
         className="absolute inset-0"
-        style={{ background: "rgba(4,3,14,0.82)", backdropFilter: "blur(14px)" }}
+        style={{ background: "rgba(2,6,23,0.82)", backdropFilter: "blur(14px)" }}
         onClick={onClose}
         aria-hidden="true"
       />
@@ -120,7 +120,7 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps): JSX.Element 
       <div
         className="relative w-full max-w-[640px] mx-4 animate-scale-in"
         style={{
-          background:    "hsl(252 28% 7%)",
+          background:    "hsl(200 28% 7%)",
           border:        "1px solid rgba(255,255,255,0.08)",
           borderRadius:  "22px",
           boxShadow:     "0 40px 100px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
@@ -130,21 +130,21 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps): JSX.Element 
         {/* Specular top */}
         <div
           className="absolute top-0 left-0 right-0 h-px rounded-t-[22px]"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(139,92,246,0.8), transparent)" }}
+          style={{ background: "linear-gradient(90deg, transparent, rgba(20,184,166,0.8), transparent)" }}
           aria-hidden="true"
         />
 
         {/* Ambient glow */}
         <div
           className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 h-40 w-60 rounded-full opacity-20"
-          style={{ background: "radial-gradient(circle, rgba(109,77,255,1) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(20,184,166,1) 0%, transparent 70%)" }}
           aria-hidden="true"
         />
 
         {/* Input */}
         <div className="flex items-center gap-3 px-5 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
           <Search
-            className={cn("h-5 w-5 shrink-0 transition-colors duration-300", isLoading ? "text-violet-400 animate-pulse" : "text-white/30")}
+            className={cn("h-5 w-5 shrink-0 transition-colors duration-300", isLoading ? "text-teal-400 animate-pulse" : "text-white/30")}
             aria-hidden="true"
           />
           <input
@@ -233,13 +233,13 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps): JSX.Element 
                       onMouseEnter={() => setActive(i)}
                       className="group w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-all duration-100"
                       style={{
-                        background: isActive ? "rgba(109,77,255,0.10)" : "transparent",
-                        border:     isActive ? "1px solid rgba(109,77,255,0.22)" : "1px solid transparent",
+                        background: isActive ? "rgba(20,184,166,0.10)" : "transparent",
+                        border:     isActive ? "1px solid rgba(20,184,166,0.22)" : "1px solid transparent",
                       }}
                     >
                       <span
                         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                        style={{ background: isActive ? "rgba(109,77,255,0.15)" : "rgba(255,255,255,0.05)" }}
+                        style={{ background: isActive ? "rgba(20,184,166,0.15)" : "rgba(255,255,255,0.05)" }}
                       >
                         <Icon
                           className={cn("h-4 w-4 transition-colors", isActive ? cfg.color : "text-white/35")}
@@ -256,7 +256,7 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps): JSX.Element 
                         </p>
                       </div>
                       <ArrowRight
-                        className={cn("h-3.5 w-3.5 shrink-0 transition-all duration-150 text-violet-400", isActive ? "opacity-100 translate-x-0.5" : "opacity-0")}
+                        className={cn("h-3.5 w-3.5 shrink-0 transition-all duration-150 text-teal-400", isActive ? "opacity-100 translate-x-0.5" : "opacity-0")}
                         aria-hidden="true"
                       />
                     </button>

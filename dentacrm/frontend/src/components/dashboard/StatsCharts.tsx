@@ -26,12 +26,12 @@ import { Skeleton } from "@/components/ui/Skeleton";
 const CHART_TTL = 5 * 60 * 1000;
 
 const PIE_COLORS = [
-  "#2563eb",
-  "#16a34a",
-  "#d97706",
-  "#dc2626",
-  "#7c3aed",
-  "#0891b2",
+  "hsl(var(--color-primary))",
+  "hsl(var(--color-success))",
+  "hsl(var(--color-warning))",
+  "hsl(var(--color-danger))",
+  "hsl(262 83% 58%)",
+  "hsl(190 90% 45%)",
 ];
 
 interface StatsChartsProps {
@@ -79,14 +79,14 @@ export function StatsCharts({ period = "week" }: StatsChartsProps): JSX.Element 
         ) : (
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={revenueSeries}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--color-border))" />
+              <XAxis dataKey="date" stroke="hsl(var(--color-fg-3))" fontSize={12} />
+              <YAxis stroke="hsl(var(--color-fg-3))" fontSize={12} />
               <Tooltip />
               <Line
                 type="monotone"
                 dataKey="amount"
-                stroke="#2563eb"
+                stroke="hsl(var(--color-primary))"
                 strokeWidth={2}
                 dot={{ r: 3 }}
               />
@@ -132,11 +132,11 @@ export function StatsCharts({ period = "week" }: StatsChartsProps): JSX.Element 
         ) : (
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={departmentRows}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-              <YAxis stroke="#64748b" fontSize={12} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--color-border))" />
+              <XAxis dataKey="name" stroke="hsl(var(--color-fg-3))" fontSize={12} />
+              <YAxis stroke="hsl(var(--color-fg-3))" fontSize={12} />
               <Tooltip />
-              <Bar dataKey="revenue" fill="#16a34a" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="revenue" fill="hsl(var(--color-success))" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

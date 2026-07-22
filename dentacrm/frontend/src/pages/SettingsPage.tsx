@@ -23,21 +23,21 @@ interface ThemeOption {
 
 const THEME_OPTIONS: ThemeOption[] = [
   {
-    value: "light",
-    label: "Yorug'",
-    description: "Oq fon. Klinika muhitida qulay.",
-    Icon: Sun,
-  },
-  {
     value: "dark",
     label: "Qorong'i",
-    description: "Ko'zni toliqtirmaydi — kechki smenalar uchun.",
+    description: "Premium dark. Ko'zni toliqtirmaydi — kechki smenalar uchun.",
     Icon: Moon,
+  },
+  {
+    value: "light",
+    label: "Yorug'",
+    description: "Toza oq fon. Kunduzgi klinika muhitida qulay.",
+    Icon: Sun,
   },
   {
     value: "system",
     label: "Tizim",
-    description: "Qurilma sozlamasi bo'yicha avtomatik.",
+    description: "Qurilma sozlamasi bo'yicha avtomatik o'zgaradi.",
     Icon: Monitor,
   },
 ];
@@ -144,7 +144,7 @@ export function SettingsPage(): JSX.Element {
           {/* Shaxsiy ma'lumotlar Card */}
           <article className="card p-6" aria-labelledby="settings-profile-heading">
             <div className="flex items-center gap-3 mb-6">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600/10 text-violet-400">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600/10 text-teal-400">
                 <User className="h-5 w-5" />
               </span>
               <div>
@@ -211,14 +211,14 @@ export function SettingsPage(): JSX.Element {
                     className="input-field"
                   />
                   <div className="mt-2 flex items-start gap-2 text-[11px] text-fg-3 leading-relaxed">
-                    <Info className="h-3.5 w-3.5 shrink-0 text-violet-400 mt-0.5" />
+                    <Info className="h-3.5 w-3.5 shrink-0 text-teal-400 mt-0.5" />
                     <span>
                       Chat ID orqali Telegramda kirish kodlari va bildirishnomalarni olasiz. ID ni bilish uchun{" "}
                       <a 
                         href="https://t.me/userinfobot" 
                         target="_blank" 
                         rel="noreferrer" 
-                        className="text-violet-400 hover:underline inline-flex items-center gap-0.5"
+                        className="text-teal-400 hover:underline inline-flex items-center gap-0.5"
                       >
                         @userinfobot
                       </a>{" "}
@@ -250,7 +250,7 @@ export function SettingsPage(): JSX.Element {
           {/* Mavzu Card */}
           <article className="card p-6" aria-labelledby="settings-theme-heading">
             <div className="flex items-center gap-3 mb-5">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600/10 text-violet-400">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600/10 text-teal-400">
                 <Sun className="h-5 w-5" />
               </span>
               <div>
@@ -259,7 +259,7 @@ export function SettingsPage(): JSX.Element {
                 </h2>
                 <p className="mt-1 text-xs text-fg-3">
                   Ilovaning umumiy ko'rinish mavzusini tanlang. Aktiv:{" "}
-                  <span className="font-semibold text-violet-400">
+                  <span className="font-semibold text-teal-400">
                     {resolvedTheme === "dark" ? "Qorong'i" : "Yorug'"}
                   </span>
                 </p>
@@ -430,13 +430,13 @@ export function SettingsPage(): JSX.Element {
           <article className="card p-5 bg-white/[0.01]" aria-labelledby="settings-info-heading">
             <h3 id="settings-info-heading" className="text-xs font-bold text-fg uppercase tracking-widest mb-3 opacity-60">Hisob turi</h3>
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-600/10 text-violet-400 text-sm font-bold">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-600/10 text-teal-400 text-sm font-bold">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}
               </span>
               <div className="min-w-0">
                 <p className="text-xs font-semibold text-fg truncate">{user?.firstName} {user?.lastName}</p>
                 <p className="text-[10px] text-fg-3 mt-0.5">
-                  Rol: <span className="text-violet-400 font-medium">{user ? (ROLE_LABELS[user.role] ?? user.role) : ""}</span>
+                  Rol: <span className="text-teal-400 font-medium">{user ? (ROLE_LABELS[user.role] ?? user.role) : ""}</span>
                 </p>
               </div>
             </div>

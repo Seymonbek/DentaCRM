@@ -62,20 +62,20 @@ export function LoginPage(): JSX.Element {
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden">
 
       {/* ── Animated ambient background ────────────────────────── */}
-      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #0a0614 0%, #0d0920 40%, #080d1a 100%)" }} />
+      <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #020617 0%, #0f172a 40%, #082f49 100%)" }} />
 
       {/* Orbs */}
       <div
         className="ambient-orb orb-1"
-        style={{ width: 700, height: 700, top: -250, left: -200, background: "radial-gradient(circle, rgba(109,77,255,0.55) 0%, transparent 65%)" }}
+        style={{ width: 700, height: 700, top: -250, left: -200, background: "radial-gradient(circle, rgba(13,148,136,0.55) 0%, transparent 65%)" }}
       />
       <div
         className="ambient-orb orb-2"
-        style={{ width: 600, height: 600, bottom: -200, right: -150, background: "radial-gradient(circle, rgba(168,85,247,0.45) 0%, transparent 65%)" }}
+        style={{ width: 600, height: 600, bottom: -200, right: -150, background: "radial-gradient(circle, rgba(14,165,233,0.45) 0%, transparent 65%)" }}
       />
       <div
         className="ambient-orb orb-3"
-        style={{ width: 400, height: 400, top: "40%", right: "15%", background: "radial-gradient(circle, rgba(59,130,246,0.30) 0%, transparent 65%)" }}
+        style={{ width: 400, height: 400, top: "40%", right: "15%", background: "radial-gradient(circle, rgba(20,184,166,0.30) 0%, transparent 65%)" }}
       />
 
       {/* Subtle grid */}
@@ -94,10 +94,10 @@ export function LoginPage(): JSX.Element {
         {/* Floating badge */}
         <div className="flex justify-center mb-6">
           <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold text-violet-300"
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold text-teal-300"
             style={{
-              background: "rgba(109,77,255,0.15)",
-              border: "1px solid rgba(109,77,255,0.30)",
+              background: "rgba(20,184,166,0.15)",
+              border: "1px solid rgba(20,184,166,0.30)",
               backdropFilter: "blur(12px)",
             }}
           >
@@ -111,8 +111,8 @@ export function LoginPage(): JSX.Element {
           <div
             className="flex h-16 w-16 items-center justify-center rounded-2xl relative"
             style={{
-              background: "linear-gradient(135deg, #6d4dff 0%, #a855f7 100%)",
-              boxShadow: "0 0 40px rgba(109,77,255,0.60), 0 0 80px rgba(109,77,255,0.20), inset 0 1px 0 rgba(255,255,255,0.30)",
+              background: "linear-gradient(135deg, #0d9488 0%, #14b8a6 100%)",
+              boxShadow: "0 0 40px rgba(20,184,166,0.60), 0 0 80px rgba(20,184,166,0.20), inset 0 1px 0 rgba(255,255,255,0.30)",
             }}
           >
             <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@ export function LoginPage(): JSX.Element {
 
           <div className="text-center">
             <h1 className="text-[28px] font-display font-bold tracking-tight text-white leading-none">
-              Denta<span style={{ color: "#a78bfa" }}>CRM</span>
+              Denta<span style={{ color: "#2dd4bf" }}>CRM</span>
             </h1>
             <p className="mt-2 text-sm text-slate-400">
               Klinika boshqaruv tizimi
@@ -136,7 +136,7 @@ export function LoginPage(): JSX.Element {
         <div
           className="rounded-2xl p-7"
           style={{
-            background: "rgba(15, 10, 30, 0.65)",
+            background: "rgba(15, 23, 42, 0.65)",
             backdropFilter: "blur(24px) saturate(180%)",
             WebkitBackdropFilter: "blur(24px) saturate(180%)",
             border: "1px solid rgba(255,255,255,0.10)",
@@ -167,7 +167,7 @@ export function LoginPage(): JSX.Element {
                   invalid={Boolean(errors.phoneNumber)}
                   aria-describedby={errors.phoneNumber ? "phone-err" : undefined}
                   className="pl-10 h-11 bg-white/[0.05] border-white/[0.12] text-white placeholder:text-slate-600
-                    focus:border-violet-500/60 focus:ring-violet-500/20 focus:bg-white/[0.08]
+                    focus:border-teal-500/60 focus:ring-teal-500/20 focus:bg-white/[0.08]
                     hover:border-white/[0.20] transition-all duration-200"
                   {...register("phoneNumber")}
                 />
@@ -197,7 +197,7 @@ export function LoginPage(): JSX.Element {
                   invalid={Boolean(errors.password)}
                   aria-describedby={errors.password ? "pw-err" : undefined}
                   className="pl-10 h-11 bg-white/[0.05] border-white/[0.12] text-white placeholder:text-slate-600
-                    focus:border-violet-500/60 focus:ring-violet-500/20 focus:bg-white/[0.08]
+                    focus:border-teal-500/60 focus:ring-teal-500/20 focus:bg-white/[0.08]
                     hover:border-white/[0.20] transition-all duration-200"
                   {...register("password")}
                 />
@@ -239,7 +239,7 @@ export function LoginPage(): JSX.Element {
         {/* Footer note */}
         <p className="mt-5 text-center text-xs text-slate-600">
           Parolni unutdingizmi?{" "}
-          <span className="text-violet-400 font-medium hover:text-violet-300 cursor-pointer transition-colors">
+          <span className="text-teal-400 font-medium hover:text-teal-300 cursor-pointer transition-colors">
             Administratorga murojaat qiling.
           </span>
         </p>

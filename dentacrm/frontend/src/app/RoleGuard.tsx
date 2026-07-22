@@ -50,11 +50,9 @@ export function RoleGuard({ allow, children }: RoleGuardProps): JSX.Element {
 export function homeForRole(role: UserRole): string {
   switch (role) {
     case "bosh_shifokor":
-      return "/dashboard";
     case "doctor":
-      return "/my-appointments";
     case "administrator":
-      return "/schedule";
+      return "/dashboard";
     default:
       return "/login";
   }

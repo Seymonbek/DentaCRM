@@ -6,19 +6,19 @@ export default {
     container: { center: true, padding: "1.5rem" },
     extend: {
       colors: {
-        // ── Brand (Indigo-Violet gradient system) ──────────────
+        // ── Brand (Clinical Teal-Cyan system) ──────────────
         brand: {
-          50:  "#f5f3ff",
-          100: "#ede9fe",
-          200: "#ddd6fe",
-          300: "#c4b5fd",
-          400: "#a78bfa",
-          500: "#8b5cf6",
-          600: "#7c3aed",
-          700: "#6d28d9",
-          800: "#5b21b6",
-          900: "#4c1d95",
-          950: "#2e1065",
+          50:  "#f0fdfa",
+          100: "#ccfbf1",
+          200: "#99f6e4",
+          300: "#5eead4",
+          400: "#2dd4bf",
+          500: "#14b8a6",
+          600: "#0d9488",
+          700: "#0f766e",
+          800: "#115e59",
+          900: "#134e4a",
+          950: "#042f2e",
         },
         // ── Semantic — wired to CSS vars ───────────────────────
         bg:          "hsl(var(--color-bg) / <alpha-value>)",
@@ -81,13 +81,13 @@ export default {
         sm:    "0 1px 4px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.06)",
         md:    "0 4px 16px -2px rgb(0 0 0 / 0.10), 0 2px 6px -2px rgb(0 0 0 / 0.06)",
         lg:    "0 16px 40px -4px rgb(0 0 0 / 0.12), 0 4px 12px -4px rgb(0 0 0 / 0.06)",
-        glow:  "0 0 32px -4px rgba(109, 77, 255, 0.45)",
-        "glow-sm": "0 0 16px -2px rgba(109, 77, 255, 0.30)",
+        glow:  "0 0 32px -4px rgba(20, 184, 166, 0.45)",
+        "glow-sm": "0 0 16px -2px rgba(20, 184, 166, 0.30)",
         "glow-green": "0 0 20px -4px rgba(22, 163, 74, 0.40)",
         "inner-light": "inset 0 1px 0 rgba(255,255,255,0.15)",
       },
       backgroundImage: {
-        "gradient-primary":  "linear-gradient(135deg, #6d4dff 0%, #9b59f5 50%, #6d4dff 100%)",
+        "gradient-primary":  "linear-gradient(135deg, #0d9488 0%, #14b8a6 50%, #0f766e 100%)",
         "gradient-surface":  "linear-gradient(180deg, hsl(var(--color-surface)) 0%, hsl(var(--color-surface-2)) 100%)",
         "gradient-radial":   "radial-gradient(ellipse at center, var(--tw-gradient-stops))",
         "gradient-conic":    "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",

@@ -9,13 +9,13 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps): JSX.Element {
   return (
-    <div className="flex min-h-screen bg-bg">
+    <div className="flex min-h-screen" style={{ background: "hsl(var(--color-bg))" }}>
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />
         <main
-          className="flex-1 p-5 sm:p-7 lg:p-8"
+          className="flex-1 p-5 sm:p-7 lg:p-8 animate-in"
           style={{ maxWidth: "100%", overflowX: "hidden" }}
         >
           {children ?? <Outlet />}

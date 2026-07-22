@@ -15,10 +15,10 @@ export function PageHeader({ title, description, actions, icon }: PageHeaderProp
         {/* Optional icon badge */}
         {icon ? (
           <div
-            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-violet-400"
+            className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-teal-400"
             style={{
-              background: "linear-gradient(135deg, hsl(252 87% 62% / 0.15), hsl(280 80% 60% / 0.10))",
-              border: "1px solid hsl(252 87% 62% / 0.20)",
+              background: "linear-gradient(135deg, hsl(173 87% 62% / 0.15), hsl(190 80% 60% / 0.10))",
+              border: "1px solid hsl(173 87% 62% / 0.20)",
             }}
           >
             {icon}

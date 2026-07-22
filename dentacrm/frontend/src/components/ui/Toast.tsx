@@ -10,26 +10,30 @@ const ICONS: Record<ToastKind, typeof CheckCircle2> = {
   info:    Info,
 };
 
-const STYLES: Record<ToastKind, { wrapper: string; icon: string; bar: string }> = {
+const STYLES: Record<ToastKind, { wrapper: string; icon: string; bar: string; text: string }> = {
   success: {
-    wrapper: "border-emerald-500/25 bg-emerald-950/80",
+    wrapper: "border-emerald-500/25",
     icon:    "text-emerald-400",
     bar:     "bg-emerald-500",
+    text:    "text-emerald-300",
   },
   error: {
-    wrapper: "border-red-500/25 bg-red-950/80",
+    wrapper: "border-red-500/25",
     icon:    "text-red-400",
     bar:     "bg-red-500",
+    text:    "text-red-300",
   },
   warning: {
-    wrapper: "border-amber-500/25 bg-amber-950/80",
+    wrapper: "border-amber-500/25",
     icon:    "text-amber-400",
     bar:     "bg-amber-500",
+    text:    "text-amber-300",
   },
   info: {
-    wrapper: "border-violet-500/25 bg-violet-950/80",
-    icon:    "text-violet-400",
-    bar:     "bg-violet-500",
+    wrapper: "border-sky-500/25",
+    icon:    "text-sky-400",
+    bar:     "bg-sky-500",
+    text:    "text-sky-300",
   },
 };
 
@@ -81,9 +85,10 @@ function ToastItem({ id, kind, title, message, duration = 4500 }: ToastItemProps
         s.wrapper,
       )}
       style={{
-        backdropFilter: "blur(20px) saturate(180%)",
-        WebkitBackdropFilter: "blur(20px) saturate(180%)",
-        boxShadow: "0 20px 48px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)",
+        background: "rgba(10, 20, 28, 0.90)",
+        backdropFilter: "blur(24px) saturate(160%)",
+        WebkitBackdropFilter: "blur(24px) saturate(160%)",
+        boxShadow: "0 20px 48px rgba(0,0,0,0.50), inset 0 1px 0 rgba(255,255,255,0.06)",
       }}
     >
       {/* Left color bar */}
@@ -96,7 +101,7 @@ function ToastItem({ id, kind, title, message, duration = 4500 }: ToastItemProps
           <p className="text-[13px] font-semibold leading-tight text-white">{title}</p>
         ) : null}
         {message ? (
-          <p className={cn("text-[12px] leading-snug text-slate-400", title ? "mt-1" : "font-medium text-white")}>
+          <p className={cn("text-[12px] leading-snug", title ? "mt-1 text-white/60" : "font-medium text-white")}>
             {message}
           </p>
         ) : null}
@@ -105,7 +110,7 @@ function ToastItem({ id, kind, title, message, duration = 4500 }: ToastItemProps
       <button
         onClick={() => dismiss(id)}
         aria-label="Yopish"
-        className="shrink-0 rounded-lg p-1 text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-all duration-150 active:scale-90"
+        className="shrink-0 rounded-lg p-1 text-white/30 hover:text-white hover:bg-white/[0.08] transition-all duration-150 active:scale-90"
       >
         <X className="h-3.5 w-3.5" />
       </button>

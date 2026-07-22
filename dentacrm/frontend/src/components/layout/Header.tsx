@@ -136,13 +136,11 @@ export function Header(): JSX.Element {
       <header
         className={cn(
           "sticky top-0 z-20 flex h-[60px] shrink-0 items-center gap-2.5 px-4 sm:px-5",
-          "transition-all duration-200",
+          "transition-all duration-200 glass",
         )}
         style={{
-          background:   "linear-gradient(180deg, hsl(252 28% 5% / 0.95) 0%, hsl(252 25% 4% / 0.9) 100%)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid var(--glass-border)",
+          background:   "var(--glass-bg)",
         }}
       >
         {/* Mobile menu toggle */}
@@ -152,7 +150,7 @@ export function Header(): JSX.Element {
           aria-label="Menyuni ochish"
           className={cn(
             "lg:hidden -ml-1 flex h-9 w-9 items-center justify-center",
-            "rounded-xl text-white/50 hover:bg-white/[0.07] hover:text-white",
+            "rounded-xl text-fg-3 hover:bg-fg-3/10 hover:text-fg",
             "transition-all duration-150 active:scale-95",
           )}
         >
@@ -167,26 +165,26 @@ export function Header(): JSX.Element {
           onClick={openSearch}
           className={cn(
             "hidden md:flex flex-1 max-w-sm items-center gap-2.5 rounded-xl px-3.5 py-2",
-            "text-white/35 text-[13px] cursor-text text-left",
-            "transition-all duration-200 hover:text-white/60",
+            "text-fg-3 text-[13px] cursor-text text-left",
+            "transition-all duration-200 hover:text-fg-2",
           )}
           style={{
-            background:  "rgba(255,255,255,0.04)",
-            border:      "1px solid rgba(255,255,255,0.08)",
+            background:  "var(--card-bg)",
+            border:      "1px solid var(--glass-border)",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(109,77,255,0.35)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)"; }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(20,184,166,0.5)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "var(--glass-border)"; }}
         >
-          <Search className="h-3.5 w-3.5 flex-shrink-0 text-white/30" aria-hidden="true" />
+          <Search className="h-3.5 w-3.5 flex-shrink-0 text-fg-3/70" aria-hidden="true" />
           <span className="flex-1 select-none">Qidirish…</span>
           <span className="hidden lg:flex items-center gap-0.5">
             <kbd
-              className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-mono text-white/25"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+              className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-mono text-fg-3/60"
+              style={{ background: "var(--color-bg)", border: "1px solid var(--glass-border)" }}
             >⌘</kbd>
             <kbd
-              className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-mono text-white/25"
-              style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
+              className="flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-mono text-fg-3/60"
+              style={{ background: "var(--color-bg)", border: "1px solid var(--glass-border)" }}
             >K</kbd>
           </span>
         </button>
@@ -195,7 +193,7 @@ export function Header(): JSX.Element {
         <button
           type="button"
           onClick={openSearch}
-          className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl text-white/50 hover:bg-white/[0.07] hover:text-white transition-all duration-150 active:scale-95"
+          className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl text-fg-3 hover:bg-fg-3/10 hover:text-fg transition-all duration-150 active:scale-95"
           aria-label="Qidirish"
         >
           <Search className="h-4 w-4" />
@@ -216,9 +214,9 @@ export function Header(): JSX.Element {
               onClick={() => setNotifOpen((o) => !o)}
               className={cn(
                 "relative flex h-9 w-9 items-center justify-center rounded-xl",
-                "text-white/50 hover:bg-white/[0.07] hover:text-white",
+                "text-fg-3 hover:bg-fg-3/10 hover:text-fg",
                 "transition-all duration-150 active:scale-95",
-                notifOpen && "bg-white/[0.07] text-white",
+                notifOpen && "bg-fg-3/10 text-fg",
               )}
             >
               <Bell className="h-4 w-4" />
@@ -239,9 +237,9 @@ export function Header(): JSX.Element {
                 <div
                   className="absolute right-0 top-full mt-2 w-[320px] rounded-2xl overflow-hidden z-20 animate-scale-in"
                   style={{
-                    background:  "hsl(252 28% 7%)",
-                    border:      "1px solid rgba(255,255,255,0.08)",
-                    boxShadow:   "0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+                    background:  "var(--card-bg)",
+                    border:      "1px solid var(--glass-border)",
+                    boxShadow:   "var(--shadow-lg)",
                     animationDuration: "140ms",
                     transformOrigin: "top right",
                   }}
@@ -249,12 +247,12 @@ export function Header(): JSX.Element {
                   {/* Header */}
                   <div
                     className="flex items-center justify-between px-4 py-3.5 border-b"
-                    style={{ borderColor: "rgba(255,255,255,0.06)" }}
+                    style={{ borderColor: "var(--glass-border)" }}
                   >
                     <div>
-                      <p className="text-[13px] font-bold text-white">Bildirishnomalar</p>
+                      <p className="text-[13px] font-bold text-fg">Bildirishnomalar</p>
                       {unreadCount > 0 && (
-                        <p className="text-[11px] text-white/40 mt-0.5">{unreadCount} ta o'qilmagan</p>
+                        <p className="text-[11px] text-fg-3 mt-0.5">{unreadCount} ta o'qilmagan</p>
                       )}
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -262,7 +260,7 @@ export function Header(): JSX.Element {
                         <button
                           type="button"
                           onClick={markAllRead}
-                          className="text-[11px] text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                          className="text-[11px] text-teal-600 dark:text-teal-400 hover:text-teal-500 font-medium transition-colors"
                         >
                           Hammasini o'qildi qilish
                         </button>
@@ -270,7 +268,7 @@ export function Header(): JSX.Element {
                       <button
                         type="button"
                         onClick={() => setNotifOpen(false)}
-                        className="flex h-6 w-6 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.07] transition-all"
+                        className="flex h-6 w-6 items-center justify-center rounded-lg text-fg-3 hover:text-fg hover:bg-fg-3/10 transition-all"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -278,9 +276,9 @@ export function Header(): JSX.Element {
                   </div>
 
                   {/* List */}
-                  <ul className="max-h-[300px] overflow-y-auto divide-y" style={{ divideColor: "rgba(255,255,255,0.04)" }}>
+                  <ul className="max-h-[300px] overflow-y-auto divide-y" style={{ divideColor: "var(--glass-border)" }}>
                     {notifications.length === 0 ? (
-                      <li className="px-4 py-8 text-center text-xs text-white/35">
+                      <li className="px-4 py-8 text-center text-xs text-fg-3">
                         Bildirishnomalar mavjud emas
                       </li>
                     ) : (
@@ -293,24 +291,24 @@ export function Header(): JSX.Element {
                             onClick={() => handleNotifClick(n)}
                             className={cn(
                               "flex items-start gap-3 px-4 py-3 transition-colors cursor-pointer",
-                              "hover:bg-white/[0.03]",
+                              "hover:bg-fg-3/5",
                             )}
                           >
                             <span
                               className={cn(
                                 "mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full",
-                                isRead ? "bg-white/10" : "bg-violet-500",
+                                isRead ? "bg-fg-3/20" : "bg-teal-500",
                               )}
-                              style={isRead ? {} : { boxShadow: "0 0 6px rgba(139,92,246,0.7)" }}
+                              style={isRead ? {} : { boxShadow: "0 0 6px rgba(20,184,166,0.7)" }}
                             />
                             <div className="min-w-0 flex-1">
-                              <p className={cn("text-[11px] font-bold uppercase tracking-wider", isRead ? "text-white/20" : "text-violet-400")}>
+                              <p className={cn("text-[11px] font-bold uppercase tracking-wider", isRead ? "text-fg-3" : "text-teal-500")}>
                                 {label}
                               </p>
-                              <p className={cn("text-[12px] leading-snug mt-0.5", isRead ? "text-white/40" : "text-white/80 font-medium")}>
+                              <p className={cn("text-[12px] leading-snug mt-0.5", isRead ? "text-fg-2" : "text-fg font-medium")}>
                                 {n.message}
                               </p>
-                              <p className="text-[10px] text-white/25 mt-1">{formatTimeAgo(n.createdAt)} oldin</p>
+                              <p className="text-[10px] text-fg-3 mt-1">{formatTimeAgo(n.createdAt)} oldin</p>
                             </div>
                           </li>
                         );
@@ -321,9 +319,9 @@ export function Header(): JSX.Element {
                   {/* Footer */}
                   <div
                     className="px-4 py-3 border-t"
-                    style={{ borderColor: "rgba(255,255,255,0.06)", background: "rgba(255,255,255,0.02)" }}
+                    style={{ borderColor: "var(--glass-border)", background: "var(--card-bg)" }}
                   >
-                    <p className="text-[11px] text-center text-white/25">So'nggi 20 ta bildirishnoma</p>
+                    <p className="text-[11px] text-center text-fg-3">So'nggi 20 ta bildirishnoma</p>
                   </div>
                 </div>
               </>
@@ -331,7 +329,7 @@ export function Header(): JSX.Element {
           </div>
 
           {/* Divider */}
-          <span className="mx-1 h-5 w-px bg-white/[0.08]" />
+          <span className="mx-1 h-5 w-px bg-fg-3/20" />
 
           {/* User profile */}
           {user && (
@@ -341,8 +339,8 @@ export function Header(): JSX.Element {
                 className="flex h-8 w-8 items-center justify-center rounded-xl text-[11px] font-bold text-white select-none cursor-pointer"
                 onClick={() => navigate("/settings")}
                 style={{
-                  background: "linear-gradient(135deg, #6d4dff, #a855f7)",
-                  boxShadow:  "0 0 12px rgba(109,77,255,0.40)",
+                  background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+                  boxShadow:  "0 0 12px rgba(20,184,166,0.40)",
                 }}
               >
                 {user.firstName?.[0]}{user.lastName?.[0]}
@@ -350,10 +348,10 @@ export function Header(): JSX.Element {
 
               {/* Name/role — hidden on small screens */}
               <div className="hidden sm:block leading-tight cursor-pointer" onClick={() => navigate("/settings")}>
-                <p className="text-[13px] font-semibold text-white leading-none mb-0.5">
+                <p className="text-[13px] font-semibold text-fg leading-none mb-0.5">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-[11px] text-white/40 leading-none">
+                <p className="text-[11px] text-fg-3 leading-none">
                   {ROLE_LABEL[user.role] ?? user.role}
                 </p>
               </div>
@@ -363,7 +361,7 @@ export function Header(): JSX.Element {
                 type="button"
                 onClick={() => navigate("/settings")}
                 aria-label="Sozlamalar"
-                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl text-white/40 hover:bg-white/[0.07] hover:text-white transition-all duration-150 active:scale-95"
+                className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl text-fg-3 hover:bg-fg-3/10 hover:text-fg transition-all duration-150 active:scale-95"
               >
                 <Settings className="h-4 w-4" />
               </button>
@@ -374,7 +372,7 @@ export function Header(): JSX.Element {
                 type="button"
                 onClick={logout}
                 aria-label="Chiqish"
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-white/40 hover:bg-red-500/10 hover:text-red-400 transition-all duration-150 active:scale-95"
+                className="flex h-9 w-9 items-center justify-center rounded-xl text-fg-3 hover:bg-red-500/10 hover:text-red-400 transition-all duration-150 active:scale-95"
               >
                 <LogOut className="h-4 w-4" />
               </button>

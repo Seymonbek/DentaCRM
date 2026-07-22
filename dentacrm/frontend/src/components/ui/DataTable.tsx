@@ -82,14 +82,25 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn("w-full overflow-hidden rounded-2xl border border-border bg-surface", className)}
-      style={{ boxShadow: "var(--shadow-sm)" }}
+    <div
+      className={cn("w-full overflow-hidden rounded-2xl", className)}
+      style={{
+        background: "var(--card-bg)",
+        border: "1px solid var(--card-border)",
+        boxShadow: "var(--shadow-sm), inset 0 1px 0 var(--card-shine)",
+      }}
     >
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
           {/* Head */}
           <thead>
-            <tr className="border-b border-border" style={{ background: "hsl(var(--color-surface-2) / 0.6)" }}>
+            <tr
+              className="border-b"
+              style={{
+                borderColor: "var(--card-border)",
+                background: "hsl(var(--color-surface-3) / 0.5)",
+              }}
+            >
               {allColumns.map((col) => (
                 <th
                   key={col.key}
@@ -127,7 +138,7 @@ export function DataTable<T>({
           <tbody>
             {isLoading ? (
               Array.from({ length: skeletonRows }).map((_, i) => (
-                <tr key={i} className="border-b border-border-2 last:border-none">
+                <tr key={i} className="border-b last:border-none" style={{ borderColor: "var(--card-border)" }}>
                   {allColumns.map((col) => (
                     <td
                       key={col.key}
@@ -170,12 +181,15 @@ export function DataTable<T>({
                   key={rowKey(row)}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
                   className={cn(
-                    "border-b border-border-2 last:border-none",
-                    "transition-all duration-150",
-                    onRowClick
-                      ? "cursor-pointer hover:bg-surface-2/60 hover:shadow-[inset_3px_0_0_hsl(var(--color-primary)/0.5)]"
-                      : "",
+                    "border-b last:border-none transition-all duration-150",
+                    onRowClick ? "cursor-pointer" : "",
                   )}
+                  style={{
+                    borderColor: "var(--card-border)",
+                    ...(onRowClick ? {} : {}),
+                  }}
+                  onMouseEnter={onRowClick ? (e) => { (e.currentTarget as HTMLElement).style.background = "hsl(var(--color-surface-2) / 0.6)"; } : undefined}
+                  onMouseLeave={onRowClick ? (e) => { (e.currentTarget as HTMLElement).style.background = ""; } : undefined}
                 >
                   {columns.map((col) => (
                     <td

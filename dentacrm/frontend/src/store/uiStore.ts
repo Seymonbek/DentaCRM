@@ -54,9 +54,9 @@ function hasWindow(): boolean {
   return typeof window !== "undefined";
 }
 
-/** Read the user's stored preference; default to ``system``. */
+/** Read the user's stored preference; default to ``dark``. */
 export function readStoredTheme(): ThemePreference {
-  if (!hasWindow()) return "system";
+  if (!hasWindow()) return "dark";
   try {
     const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (raw && THEME_VALUES.has(raw as ThemePreference)) {
@@ -65,7 +65,7 @@ export function readStoredTheme(): ThemePreference {
   } catch {
     // localStorage may be blocked (private-mode) — fall through.
   }
-  return "system";
+  return "dark";
 }
 
 /** Read the current OS-level preference. Falls back to ``light``. */

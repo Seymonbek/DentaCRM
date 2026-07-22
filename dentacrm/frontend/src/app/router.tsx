@@ -111,14 +111,6 @@ export function AppRouter(): JSX.Element {
         }
       >
         <Route
-          path="/dashboard"
-          element={
-            <RouteSuspense>
-              <DashboardPage />
-            </RouteSuspense>
-          }
-        />
-        <Route
           path="/departments"
           element={
             <RouteSuspense>
@@ -160,10 +152,10 @@ export function AppRouter(): JSX.Element {
         />
       </Route>
 
-      {/* bosh_shifokor + doctor */}
+      {/* bosh_shifokor + doctor + administrator */}
       <Route
         element={
-          <RoleGuard allow={["bosh_shifokor", "doctor"]}>
+          <RoleGuard allow={["bosh_shifokor", "doctor", "administrator"]}>
             <AppShell />
           </RoleGuard>
         }
@@ -272,7 +264,7 @@ export function AppRouter(): JSX.Element {
         />
       </Route>
 
-      {/* Everyone (settings) */}
+      {/* Everyone (dashboard & settings) */}
       <Route
         element={
           <RoleGuard allow={["bosh_shifokor", "doctor", "administrator"]}>
@@ -280,6 +272,14 @@ export function AppRouter(): JSX.Element {
           </RoleGuard>
         }
       >
+        <Route
+          path="/dashboard"
+          element={
+            <RouteSuspense>
+              <DashboardPage />
+            </RouteSuspense>
+          }
+        />
         <Route
           path="/settings"
           element={

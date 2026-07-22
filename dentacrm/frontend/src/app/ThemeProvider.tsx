@@ -32,11 +32,12 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
   const resolved = useUiStore((s) => s.resolvedTheme);
   const refreshResolvedTheme = useUiStore((s) => s.refreshResolvedTheme);
 
-  // ---- Apply <html class="dark"> whenever resolvedTheme changes -------
+  // ---- Apply <html class="dark|light"> whenever resolvedTheme changes -------
   useEffect(() => {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
-    root.classList.toggle("dark", resolved === "dark");
+    root.classList.remove("dark", "light");
+    root.classList.add(resolved);
     root.style.colorScheme = resolved;
 
     // Sync <meta name="theme-color"> for mobile browser chrome.

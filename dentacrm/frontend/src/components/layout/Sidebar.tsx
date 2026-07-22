@@ -21,14 +21,14 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: "/dashboard",        label: "Boshqaruv",      icon: LayoutDashboard, roles: ["bosh_shifokor"],                          section: "Asosiy"    },
+  { to: "/dashboard",        label: "Boshqaruv",      icon: LayoutDashboard, roles: ["bosh_shifokor", "doctor", "administrator"], section: "Asosiy"  },
   { to: "/departments",      label: "Bo'limlar",       icon: Building2,       roles: ["bosh_shifokor"]                                                  },
   { to: "/doctors",          label: "Shifokorlar",     icon: Stethoscope,     roles: ["bosh_shifokor"]                                                  },
   { to: "/finance",          label: "Moliya",          icon: Wallet,          roles: ["bosh_shifokor"]                                                  },
   { to: "/reports",          label: "Hisobotlar",      icon: BarChart3,       roles: ["bosh_shifokor"]                                                  },
   { to: "/my-appointments",  label: "Navbatlarim",     icon: CalendarDays,    roles: ["doctor"],                                section: "Asosiy"    },
   { to: "/my-patients",      label: "Bemorlar",        icon: Users,           roles: ["bosh_shifokor", "doctor", "administrator"], section: "Bemorlar"  },
-  { to: "/inventory",        label: "Omborxona",       icon: Package,         roles: ["bosh_shifokor", "doctor"]                                        },
+  { to: "/inventory",        label: "Omborxona",       icon: Package,         roles: ["bosh_shifokor", "doctor", "administrator"]                       },
   { to: "/ratings",          label: "Reyting",         icon: Trophy,          roles: ["bosh_shifokor", "doctor"]                                        },
   { to: "/schedule",         label: "Jadval",          icon: CalendarDays,    roles: ["bosh_shifokor", "administrator"],         section: "Boshqaruv" },
   { to: "/patients/new",     label: "Bemor qo'shish",  icon: UserPlus,        roles: ["bosh_shifokor", "administrator"]                                 },
@@ -100,25 +100,25 @@ export function Sidebar(): JSX.Element {
         className={cn(
           "fixed inset-y-0 left-0 z-30 flex flex-col",
           sidebarW,
-          "transition-all duration-300 ease-spring lg:sticky lg:top-0 lg:translate-x-0",
-          sidebarOpen ? "translate-x-0 shadow-[4px_0_40px_rgba(0,0,0,0.4)]" : "-translate-x-full",
+          "transition-all duration-300 ease-spring lg:sticky lg:top-0 lg:h-screen lg:translate-x-0",
+          sidebarOpen ? "translate-x-0 shadow-[4px_0_40px_rgba(0,0,0,0.25)]" : "-translate-x-full",
+          "glass"
         )}
         style={{
-          background:   "linear-gradient(180deg, hsl(252 30% 5%) 0%, hsl(252 25% 4%) 100%)",
-          borderRight:  "1px solid rgba(255,255,255,0.06)",
+          borderRight:  "1px solid var(--glass-border)",
         }}
         aria-label="Asosiy navigatsiya"
       >
         {/* Ambient glow top */}
         <div
           className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-48 rounded-full opacity-25"
-          style={{ background: "radial-gradient(circle, rgba(109,77,255,1) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(20,184,166,1) 0%, transparent 70%)" }}
           aria-hidden="true"
         />
         {/* Ambient glow bottom */}
         <div
           className="pointer-events-none absolute -bottom-20 left-1/2 -translate-x-1/2 h-40 w-40 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, rgba(168,85,247,1) 0%, transparent 70%)" }}
+          style={{ background: "radial-gradient(circle, rgba(14,165,233,1) 0%, transparent 70%)" }}
           aria-hidden="true"
         />
 
@@ -128,14 +128,14 @@ export function Sidebar(): JSX.Element {
             "relative flex h-[60px] shrink-0 items-center gap-3 border-b",
             collapsed ? "justify-center px-0" : "px-4",
           )}
-          style={{ borderColor: "rgba(255,255,255,0.06)" }}
+          style={{ borderColor: "var(--glass-border)" }}
         >
           {/* Logo mark */}
           <div
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
             style={{
-              background:  "linear-gradient(135deg, #6d4dff 0%, #a855f7 100%)",
-              boxShadow:   "0 0 20px rgba(109,77,255,0.55), inset 0 1px 0 rgba(255,255,255,0.25)",
+              background:  "linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)",
+              boxShadow:   "0 0 20px rgba(56, 189, 248, 0.45), inset 0 1px 0 rgba(255,255,255,0.25)",
             }}
           >
             <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -145,10 +145,10 @@ export function Sidebar(): JSX.Element {
 
           {!collapsed && (
             <div className="min-w-0">
-              <span className="font-display text-[16px] font-bold tracking-tight text-white leading-none block">
-                Denta<span style={{ color: "#a78bfa" }}>CRM</span>
+              <span className="font-display text-[16px] font-extrabold tracking-tight text-fg leading-none block">
+                Denta<span className="gradient-text font-black">CRM</span>
               </span>
-              <p className="text-[10px] text-white/30 mt-0.5 leading-none">Klinika tizimi</p>
+              <p className="text-[10px] text-fg-3 mt-0.5 leading-none">Klinika tizimi</p>
             </div>
           )}
 
@@ -159,12 +159,12 @@ export function Sidebar(): JSX.Element {
             onClick={toggleCollapsed}
             className={cn(
               "hidden lg:flex absolute -right-3 h-6 w-6 items-center justify-center rounded-full",
-              "border text-white/50 hover:text-white transition-all duration-150 hover:scale-110",
+              "border text-fg-3 hover:text-fg transition-all duration-150 hover:scale-110",
             )}
             style={{
-              background:   "hsl(252 25% 10%)",
-              borderColor:  "rgba(255,255,255,0.12)",
-              boxShadow:    "0 2px 8px rgba(0,0,0,0.4)",
+              background:   "var(--card-bg)",
+              borderColor:  "var(--glass-border)",
+              boxShadow:    "var(--shadow-sm)",
             }}
           >
             {collapsed
@@ -179,11 +179,11 @@ export function Sidebar(): JSX.Element {
           {sections.map((sec) => (
             <div key={sec.title || "main"} className={collapsed ? "px-2" : "px-3"}>
               {sec.title && !collapsed ? (
-                <p className="px-2.5 mb-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-white/25 select-none">
+                <p className="px-2.5 mb-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-fg-3 select-none">
                   {sec.title}
                 </p>
               ) : sec.title && collapsed ? (
-                <div className="my-1.5 h-px bg-white/[0.06]" />
+                <div className="my-1.5 h-px bg-fg-3/10" />
               ) : null}
 
               <div className="space-y-0.5">
@@ -199,8 +199,8 @@ export function Sidebar(): JSX.Element {
                         "transition-all duration-200 ease-spring select-none",
                         collapsed ? "justify-center px-0 py-2.5" : "px-3 py-2.5",
                         isActive
-                          ? "text-violet-300"
-                          : "text-white/45 hover:text-white/80",
+                          ? "text-[hsl(var(--color-primary))]"
+                          : "text-fg-3 hover:text-fg",
                       )
                     }
                   >
@@ -211,8 +211,8 @@ export function Sidebar(): JSX.Element {
                           <span
                             className="absolute inset-0 rounded-xl"
                             style={{
-                              background:  "linear-gradient(135deg, rgba(109,77,255,0.18) 0%, rgba(168,85,247,0.10) 100%)",
-                              border:      "1px solid rgba(109,77,255,0.25)",
+                              background:  "linear-gradient(135deg, hsla(var(--color-primary)/0.18) 0%, rgba(14,165,233,0.10) 100%)",
+                              border:      "1px solid hsla(var(--color-primary)/0.25)",
                               boxShadow:   "inset 0 1px 0 rgba(255,255,255,0.06)",
                             }}
                             aria-hidden="true"
@@ -222,8 +222,8 @@ export function Sidebar(): JSX.Element {
                           className={cn(
                             "relative h-4 w-4 shrink-0 transition-all duration-200",
                             isActive
-                              ? "text-violet-400"
-                              : "text-white/35 group-hover:text-white/70",
+                              ? "text-[hsl(var(--color-primary))]"
+                              : "text-fg-3 group-hover:text-fg",
                           )}
                           aria-hidden="true"
                         />
@@ -231,7 +231,7 @@ export function Sidebar(): JSX.Element {
                           <>
                             <span className="relative flex-1">{item.label}</span>
                             {isActive && (
-                              <ChevronRight className="relative h-3 w-3 text-violet-500/60 shrink-0" />
+                              <ChevronRight className="relative h-3 w-3 text-[hsl(var(--color-primary))]/60 shrink-0" />
                             )}
                           </>
                         )}
@@ -248,7 +248,7 @@ export function Sidebar(): JSX.Element {
         {user && (
           <div
             className="shrink-0 p-3 relative"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+            style={{ borderTop: "1px solid var(--glass-border)" }}
             ref={profileRef}
           >
             {/* Profile dropdown */}
@@ -256,23 +256,23 @@ export function Sidebar(): JSX.Element {
               <div
                 className="absolute bottom-full left-3 right-3 mb-2 rounded-2xl overflow-hidden animate-scale-in"
                 style={{
-                  background:  "hsl(252 28% 8%)",
-                  border:      "1px solid rgba(255,255,255,0.08)",
-                  boxShadow:   "0 -20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+                  background:  "var(--card-bg)",
+                  border:      "1px solid var(--glass-border)",
+                  boxShadow:   "var(--shadow-lg)",
                   animationDuration: "130ms",
                 }}
               >
                 {/* Info section */}
-                <div className="px-4 pt-4 pb-3 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                  <p className="text-[13px] font-bold text-white truncate">{user.firstName} {user.lastName}</p>
-                  <p className="text-[11px] text-white/40 mt-0.5">{ROLE_LABELS[user.role] ?? user.role}</p>
+                <div className="px-4 pt-4 pb-3 border-b" style={{ borderColor: "var(--glass-border)" }}>
+                  <p className="text-[13px] font-bold text-fg truncate">{user.firstName} {user.lastName}</p>
+                  <p className="text-[11px] text-fg-3 mt-0.5">{ROLE_LABELS[user.role] ?? user.role}</p>
                 </div>
                 {/* Actions */}
                 <div className="p-1.5">
                   <button
                     type="button"
                     onClick={() => { navigate("/settings"); setProfileOpen(false); setSidebar(false); }}
-                    className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-white/60 hover:text-white hover:bg-white/[0.06] transition-all duration-150"
+                    className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-fg-2 hover:bg-fg-3/10 transition-all duration-150"
                   >
                     <Settings className="h-3.5 w-3.5" />
                     Sozlamalar
@@ -280,12 +280,12 @@ export function Sidebar(): JSX.Element {
                   <button
                     type="button"
                     onClick={logout}
-                    className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/[0.08] transition-all duration-150"
+                    className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium text-red-500/80 hover:text-red-400 hover:bg-red-500/[0.08] transition-all duration-150"
                   >
                     <LogOut className="h-3.5 w-3.5" />
                     Chiqish
                   </button>
-                </div>
+                  </div>
               </div>
             )}
 
@@ -297,16 +297,16 @@ export function Sidebar(): JSX.Element {
               className={cn(
                 "w-full flex items-center gap-3 rounded-xl transition-all duration-150",
                 collapsed ? "justify-center p-2" : "px-3 py-2.5",
-                "hover:bg-white/[0.06]",
-                profileOpen && "bg-white/[0.04]",
+                "hover:bg-fg-3/10",
+                profileOpen && "bg-fg-3/5",
               )}
             >
               {/* Avatar */}
               <div
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold text-white select-none"
                 style={{
-                  background: "linear-gradient(135deg, #6d4dff, #a855f7)",
-                  boxShadow:  "0 0 12px rgba(109,77,255,0.40)",
+                  background: "linear-gradient(135deg, #0d9488, #14b8a6)",
+                  boxShadow:  "0 0 12px rgba(20,184,166,0.40)",
                 }}
               >
                 {user.firstName?.[0]}{user.lastName?.[0]}
@@ -315,10 +315,10 @@ export function Sidebar(): JSX.Element {
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1 text-left">
-                    <p className="truncate text-[12px] font-semibold text-white/80 leading-tight">
+                    <p className="truncate text-[12px] font-semibold text-fg-2 leading-tight">
                       {user.firstName} {user.lastName}
                     </p>
-                    <p className="text-[10px] text-white/35 truncate capitalize mt-0.5">
+                    <p className="text-[10px] text-fg-3 truncate capitalize mt-0.5">
                       {ROLE_LABELS[user.role] ?? user.role}
                     </p>
                   </div>
